@@ -1,6 +1,6 @@
 #Custom Ignore
 inputFile/
-
+outputFile
 #VS code
 vs/
 vscode/
