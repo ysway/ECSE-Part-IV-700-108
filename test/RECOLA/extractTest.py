@@ -2,7 +2,7 @@ from librosa import load, display, yin
 import matplotlib.pyplot as plt
 
 def extractTest():
-    testAudioInput = '../inputFile/P16.wav'
+    testAudioInput = '../../inputFile/P16.wav'
     x , sr = load(testAudioInput)
     print(type(x), type(sr))
     #plt.figure(figsize=(14, 5))

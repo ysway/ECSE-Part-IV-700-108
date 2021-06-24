@@ -23,11 +23,11 @@ def vaVisualisation(inputPath, outputPath, mode):
     va = np.array(va)
 
     plt.ioff()
-    fig = plt.figure()
+    fig = plt.figure(figsize=[24, 12])
     if mode == 'arousal':
-        fig.suptitle('Time vs Arousal of '+inputPath[-7:], fontsize=16)
+        fig.suptitle('Time vs Arousal of '+inputPath[inputPath.rfind('/')+1:], fontsize=16)
     elif mode == 'valence':
-        fig.suptitle('Time vs Valence of '+inputPath[-7:], fontsize=16)
+        fig.suptitle('Time vs Valence of '+inputPath[inputPath.rfind('/')+1:], fontsize=16)
     else:
         pass
     plt.xlabel("Time(s)")
@@ -38,17 +38,17 @@ def vaVisualisation(inputPath, outputPath, mode):
     else:
         pass
     plt.plot(t, va)
-    plt.savefig(outputPath[:outputPath.rfind('/')]+mode+outputPath[outputPath.rfind('/'):])
+    plt.savefig(outputPath[:outputPath.rfind('/')]+mode+outputPath[outputPath.rfind('/'):], format="svg")
     plt.close(fig)
 
 def batchPlot(mode):
-    inputPath = '../inputFile/emotional_behaviour/'
-    outputPath = '../outputFile/'
+    inputPath = '../../inputFile/emotional_behaviour/'
+    outputPath = '../../outputFile/RECOLA/'
     print("Plot "+mode+" starts\r\n")
     for i in range(16, 66):
         try:
-            vaVisualisation(inputPath+'/P'+str(i)+'.csv', outputPath+'/P'+str(i)+'.png', mode)
-            print('Saving P'+str(i)+'.png to '+mode+' output path')
+            vaVisualisation(inputPath+'/P'+str(i)+'.csv', outputPath+'/P'+str(i)+'.svg', mode)
+            print('Saving P'+str(i)+'.svg to '+mode+' output path')
         except:
             print('P'+str(i)+'.csv is missing, skipping...')
     print("\r\nPlot "+mode+" are finished\r\n")
