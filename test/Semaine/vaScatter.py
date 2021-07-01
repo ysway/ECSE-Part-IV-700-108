@@ -1,23 +1,35 @@
+import os
 import matplotlib.pyplot as plt
 import numpy as np
 import csv
 
-def vaScatterPlot(inputPath, outputPath):
-    with open(inputPath, 'r', newline='') as csv_file:
-        reader = csv.reader(csv_file)
-        tVSva = list(reader)
+def vaScatterPlot(inputPathV, inputPathA, outputPath):
+    # arousal extraction
+    with open(inputPathA, 'r', newline='') as csv_file:
+        reader = csv.reader(line.replace(' ', ',') for line in csv_file)
+        tVSa = list(reader)
     csv_file.close()
 
-    tVSva = tVSva[1:]
-
-    v = []
     a = []
-    for data in tVSva:
+    for data in tVSa:
+        a.append(float(data[1]))
+
+    a = np.array(a)
+
+    # valence extraction
+    with open(inputPathV, 'r', newline='') as csv_file:
+        reader = csv.reader(line.replace(' ', ',') for line in csv_file)
+        tVSv = list(reader)
+    csv_file.close()
+    
+    v = []
+    # t = list()
+    for data in tVSv:
+        # t.append(float(data[0]))
         v.append(float(data[1]))
-        a.append(float(data[2]))
 
     v = np.array(v)
-    a = np.array(a)
+    # t = np.array(t)
 
     plt.ioff()
     fig = plt.figure(figsize=[12, 12])
@@ -36,7 +48,7 @@ def vaScatterPlot(inputPath, outputPath):
     ax.xaxis.set_ticks_position('bottom')
     ax.yaxis.set_ticks_position('left')
 
-    fig.suptitle('VA Scatter of '+inputPath[inputPath.rfind('/')+1:], fontsize=16)
+    fig.suptitle('VA Scatter of '+inputPathV[inputPathV.rfind('/')+1:], fontsize=16)
     plt.xlim([-1, 1])
     plt.ylim([-1, 1])
     # Because we moved the label position so the x,y should be on other way round
@@ -53,13 +65,24 @@ def vaScatterPlot(inputPath, outputPath):
     plt.close(fig)
 
 def batchPlot():
-    inputPath = '../../inputFile/Semaine/'
+    validSessions = open("validSessions.txt", "r").readlines()
+    validSessions = [session[:-1] for session in validSessions]
+
+    inputPath = '../../inputFile/Sessions/'
     outputPath = '../../outputFile/Semaine/scatter/'
+
     print("Plot scatter starts\r\n")
-    vaScatterPlot(inputPath+'female1_arousal_valence.csv', outputPath+'female1_arousal_valence.svg')
-    vaScatterPlot(inputPath+'female2_arousal_valence.csv', outputPath+'female2_arousal_valence.svg')
-    vaScatterPlot(inputPath+'male1_arousal_valence.csv', outputPath+'male1_arousal_valence.svg')
-    vaScatterPlot(inputPath+'male2_arousal_valence.csv', outputPath+'male2_arousal_valence.svg')
+    for session in validSessions:
+        for f_name in os.listdir(inputPath+session+'/'):
+            if f_name.endswith('V.txt'):
+                try:
+                    if not os.path.exists(outputPath+session+'/'):
+                        os.mkdir(outputPath+session+'/')
+                    vaScatterPlot(inputPath+session+'/'+f_name, inputPath+session+'/'+f_name[:-5]+'A.txt', outputPath+session+'/'+f_name[:-4]+'.svg')
+                    print('Saving '+f_name[:-4]+'.svg to scatter output path')
+                except:
+                    print('Partial file is missing or V A lengths are not equal, skipping...')
+
     print("\r\nPlot scatters are finished\r\n")
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import csv
 
-def vaVisualisation(inputPath, outputPath, mode):
+def vaVisualisation(inputPath, outputPath, mode, scatterMode):
     with open(inputPath[:inputPath.rfind('/')]+mode+inputPath[inputPath.rfind('/'):], 'r', newline='') as csv_file:
         reader = csv.reader(line.replace(';', ',') for line in csv_file)
         tVSva = list(reader)
@@ -37,7 +37,10 @@ def vaVisualisation(inputPath, outputPath, mode):
         plt.ylabel("Valence")
     else:
         pass
-    plt.plot(t, va)
+    if scatterMode:
+        plt.scatter(t, va, s=2)
+    else:   
+        plt.plot(t, va)
     plt.savefig(outputPath[:outputPath.rfind('/')]+mode+outputPath[outputPath.rfind('/'):], format="svg")
     plt.close(fig)
 
@@ -47,7 +50,7 @@ def batchPlot(mode):
     print("Plot "+mode+" starts\r\n")
     for i in range(16, 66):
         try:
-            vaVisualisation(inputPath+'/P'+str(i)+'.csv', outputPath+'/P'+str(i)+'.svg', mode)
+            vaVisualisation(inputPath+'/P'+str(i)+'.csv', outputPath+'/P'+str(i)+'.svg', mode, False)
             print('Saving P'+str(i)+'.svg to '+mode+' output path')
         except:
             print('P'+str(i)+'.csv is missing, skipping...')
