@@ -3,13 +3,12 @@ import numpy as np
 import csv
 
 def combinedScatterPlot():
-
     inputPath = '../../inputFile/emotional_behaviour/'
     outputPath = '../../outputFile/RECOLA/scatter'
-
+    saveFormat = 'svg'
     a = []
     v = []
-    print("Reading starts\r\n")
+    print('Reading starts\r\n')
     for i in range(16, 66):
         try:
             # arousal extraction
@@ -47,7 +46,10 @@ def combinedScatterPlot():
     v = np.array(v)
 
     plt.ioff()
-    fig = plt.figure(figsize=[12, 12])
+    if saveFormat.lower() == 'png':
+        fig = plt.figure(figsize=[24, 24])
+    else:
+        fig = plt.figure(figsize=[12, 12])
     ax = fig.add_subplot(1, 1, 1)
     ax.set_aspect('equal')
 
@@ -67,19 +69,19 @@ def combinedScatterPlot():
     plt.xlim([-1, 1])
     plt.ylim([-1, 1])
     # Because we moved the label position so the x,y should be on other way round
-    ax.yaxis.set_label_position("right")
-    ax.xaxis.set_label_position("top")
-    plt.xlabel("Arousal")
-    plt.ylabel("Valance")
+    ax.yaxis.set_label_position('right')
+    ax.xaxis.set_label_position('top')
+    plt.xlabel('Arousal')
+    plt.ylabel('Valance')
     # ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
     unitCircle = plt.Circle((0, 0), 1, color='r', fill=False)
     ax.add_patch(unitCircle)
     
     plt.scatter(v, a, s=2)
-    plt.savefig(outputPath+'/combinedScatter.svg', format="svg")
+    plt.savefig(outputPath+'/combinedScatter.'+saveFormat, format=saveFormat)
     plt.close(fig)
 
-    print("\r\nPlot scatters are finished\r\n")
+    print('\r\nPlot scatters are finished\r\n')
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     combinedScatterPlot()

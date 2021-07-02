@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import csv
 
-def vaScatterPlot(inputPathV, inputPathA, outputPath, saveFormat):
+def vaArrayExtractor(inputPathV, inputPathA):
     # arousal extraction
     with open(inputPathA, 'r', newline='') as csv_file:
         reader = csv.reader(line.replace(' ', ',') for line in csv_file)
@@ -15,9 +15,7 @@ def vaScatterPlot(inputPathV, inputPathA, outputPath, saveFormat):
         if len(data)==0:
             break
         a.append(float(data[1]))
-
-    a = np.array(a)
-
+    
     # valence extraction
     with open(inputPathV, 'r', newline='') as csv_file:
         reader = csv.reader(line.replace(' ', ',') for line in csv_file)
@@ -25,15 +23,10 @@ def vaScatterPlot(inputPathV, inputPathA, outputPath, saveFormat):
     csv_file.close()
     
     v = []
-    # t = list()
     for data in tVSv:
         if len(data)==0:
             break
-        # t.append(float(data[0]))
         v.append(float(data[1]))
-
-    v = np.array(v)
-    # t = np.array(t)
 
     # VA length handler
     if len(v)<len(a):
@@ -43,6 +36,12 @@ def vaScatterPlot(inputPathV, inputPathA, outputPath, saveFormat):
     else:
         pass
 
+    return v, a
+
+def combinedScatterPlot(v, a, outputPath, saveFormat):
+    a = np.array(a)
+    v = np.array(v)
+    
     plt.ioff()
     if saveFormat.lower() == 'png':
         fig = plt.figure(figsize=[24, 24])
@@ -63,7 +62,7 @@ def vaScatterPlot(inputPathV, inputPathA, outputPath, saveFormat):
     ax.xaxis.set_ticks_position('bottom')
     ax.yaxis.set_ticks_position('left')
 
-    fig.suptitle('VA Scatter of '+inputPathV[inputPathV.rfind('/')+1:], fontsize=16)
+    fig.suptitle('VA Scatter of All files', fontsize=16)
     plt.xlim([-1, 1])
     plt.ylim([-1, 1])
     # Because we moved the label position so the x,y should be on other way round
@@ -79,29 +78,31 @@ def vaScatterPlot(inputPathV, inputPathA, outputPath, saveFormat):
     plt.savefig(outputPath+'.'+saveFormat, format=saveFormat)
     plt.close(fig)
 
-def batchPlot():
+def sessionIterator():
     validSessionsText = open('validSessions.txt', 'r').readlines()
     validSessions = [session[:-1] for session in validSessionsText[:-1]]
     validSessions.append(validSessionsText[-1])
     del validSessionsText
 
     inputPath = '../../inputFile/Sessions/'
-    outputPath = '../../outputFile/Semaine/scatter/'
-    saveFormat = 'svg'
+    outputPath = '../../outputFile/Semaine/scatter/combinedScatterPlot'
+    saveFormat = 'png'
+    a = list()
+    v = list()
 
-    print('Plot scatter starts\r\n')
+    print('Reading starts\r\n')
     for session in validSessions:
         print('Session: '+session)
         for f_name in os.listdir(inputPath+session+'/'):
             if f_name.endswith('V.txt'):
                 try:
-                    if not os.path.exists(outputPath+session+'/'):
-                        os.mkdir(outputPath+session+'/')
-                    vaScatterPlot(inputPath+session+'/'+f_name, inputPath+session+'/'+f_name[:-5]+'A.txt', outputPath+session+'/'+f_name[:-5], saveFormat)
+                    tmpList = vaArrayExtractor(inputPath+session+'/'+f_name, inputPath+session+'/'+f_name[:-5]+'A.txt')
+                    v += tmpList[0]
+                    a += tmpList[1]
                 except:
                     print('\tPartial file ('+f_name[:-5]+') is missing, skipping...')
-
-    print('Plot scatters are finished\r\n')
+    combinedScatterPlot(v, a, outputPath, saveFormat)
+    print('Saving combined scatter plot to output path\r\n')
 
 if __name__ == '__main__':
-    batchPlot()
+    sessionIterator()

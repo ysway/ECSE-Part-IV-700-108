@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import csv
 
-def vaVisCombinedPlot(inputPathV, inputPathA, outputPath, scatterMode):
+def vaVisCombinedPlot(inputPathV, inputPathA, outputPath, scatterMode, saveFormat):
     # arousal extraction
     with open(inputPathA, 'r', newline='') as csv_file:
         reader = csv.reader(line.replace(';', ',') for line in csv_file)
@@ -39,33 +39,38 @@ def vaVisCombinedPlot(inputPathV, inputPathA, outputPath, scatterMode):
 
     t = np.array(t)
     plt.ioff()
-    fig = plt.figure(figsize=[24, 12])
+    if saveFormat.lower() == 'png':
+        fig = plt.figure(figsize=[48, 24])
+    else:
+        fig = plt.figure(figsize=[24, 12])
     fig.suptitle('Time vs VA of '+inputPathV[inputPathV.rfind('/')+1:], fontsize=16)
-    plt.xlabel("Time(s)")
-    plt.ylabel("VA")
+    plt.xlabel('Time(s)')
+    plt.ylabel('VA')
 
     if scatterMode:
-        plt.scatter(t, v, s=2, label = "Valence")
-        plt.scatter(t, a, s=2, label = "Arousal")
+        plt.scatter(t, v, s=2, label = 'Valence')
+        plt.scatter(t, a, s=2, label = 'Arousal')
     else:  
-        plt.plot(t, v, label = "Valence")
-        plt.plot(t, a, label = "Arousal")
+        plt.plot(t, v, label = 'Valence')
+        plt.plot(t, a, label = 'Arousal')
 
     plt.legend()
-    plt.savefig(outputPath, format="svg")
+    plt.savefig(outputPath+'.'+saveFormat, format=saveFormat)
     plt.close(fig)
 
 def batchPlot():
     inputPath = '../../inputFile/emotional_behaviour/'
     outputPath = '../../outputFile/RECOLA/combinedVis'
-    print("Plot combined visualisation starts\r\n")
+    print('Plot combined visualisation starts\r\n')
+    saveFormat = 'svg'
+    scatterMode = False
     for i in range(16, 66):
         try:
-            vaVisCombinedPlot(inputPath+'valence/P'+str(i)+'.csv', inputPath+'arousal/P'+str(i)+'.csv', outputPath+'/P'+str(i)+'.svg', False)
-            print('Saving P'+str(i)+'.svg to combined visualisation output path')
+            vaVisCombinedPlot(inputPath+'valence/P'+str(i)+'.csv', inputPath+'arousal/P'+str(i)+'.csv', outputPath+'/P'+str(i), scatterMode, saveFormat)
+            print('Saving P'+str(i)+'.'+saveFormat+' to combined visualisation output path')
         except:
             print('P'+str(i)+'.csv is missing, skipping...')
-    print("\r\nPlot are finished\r\n")
+    print('\r\nPlot are finished\r\n')
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     batchPlot()

@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import csv
 
-def vaVisualisation(inputPath, outputPath, mode, scatterMode):
+def vaVisualisation(inputPath, outputPath, mode, scatterMode, saveFormat):
     with open(inputPath[:inputPath.rfind('/')]+mode+inputPath[inputPath.rfind('/'):], 'r', newline='') as csv_file:
         reader = csv.reader(line.replace(';', ',') for line in csv_file)
         tVSva = list(reader)
@@ -23,44 +23,49 @@ def vaVisualisation(inputPath, outputPath, mode, scatterMode):
     va = np.array(va)
 
     plt.ioff()
-    fig = plt.figure(figsize=[24, 12])
+    if saveFormat.lower() == 'png':
+        fig = plt.figure(figsize=[48, 24])
+    else:
+        fig = plt.figure(figsize=[24, 12])
     if mode == 'arousal':
         fig.suptitle('Time vs Arousal of '+inputPath[inputPath.rfind('/')+1:], fontsize=16)
     elif mode == 'valence':
         fig.suptitle('Time vs Valence of '+inputPath[inputPath.rfind('/')+1:], fontsize=16)
     else:
         pass
-    plt.xlabel("Time(s)")
+    plt.xlabel('Time(s)')
     if mode == 'arousal':
-        plt.ylabel("Arousal")
+        plt.ylabel('Arousal')
     elif mode == 'valence':
-        plt.ylabel("Valence")
+        plt.ylabel('Valence')
     else:
         pass
     if scatterMode:
         plt.scatter(t, va, s=2)
-    else:   
+    else:
         plt.plot(t, va)
-    plt.savefig(outputPath[:outputPath.rfind('/')]+mode+outputPath[outputPath.rfind('/'):], format="svg")
+    plt.savefig(outputPath[:outputPath.rfind('/')]+mode+outputPath[outputPath.rfind('/'):]+'.'+saveFormat, format=saveFormat)
     plt.close(fig)
 
 def batchPlot(mode):
     inputPath = '../../inputFile/emotional_behaviour/'
     outputPath = '../../outputFile/RECOLA/'
-    print("Plot "+mode+" starts\r\n")
+    scatterMode = False
+    saveFormat = 'svg'
+    print('Plot '+mode+' starts\r\n')
     for i in range(16, 66):
         try:
-            vaVisualisation(inputPath+'/P'+str(i)+'.csv', outputPath+'/P'+str(i)+'.svg', mode, False)
-            print('Saving P'+str(i)+'.svg to '+mode+' output path')
+            vaVisualisation(inputPath+'/P'+str(i)+'.csv', outputPath+'/P'+str(i), mode, scatterMode, saveFormat)
+            print('Saving P'+str(i)+'.'+saveFormat+' to '+mode+' output path')
         except:
             print('P'+str(i)+'.csv is missing, skipping...')
-    print("\r\nPlot "+mode+" are finished\r\n")
+    print('\r\nPlot '+mode+' are finished\r\n')
 
 def plotVA():
     batchPlot('arousal')
-    print("="*25+"\r\n")
+    print('='*25+'\r\n')
     batchPlot('valence')
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     plotVA()
     

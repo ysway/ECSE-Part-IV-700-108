@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import csv
 
-def vaScatterPlot(inputPathV, inputPathA, outputPath):
+def vaScatterPlot(inputPathV, inputPathA, outputPath, saveFormat):
     # arousal extraction
     with open(inputPathA, 'r', newline='') as csv_file:
         reader = csv.reader(line.replace(';', ',') for line in csv_file)
@@ -38,7 +38,10 @@ def vaScatterPlot(inputPathV, inputPathA, outputPath):
     v = np.array(v)
 
     plt.ioff()
-    fig = plt.figure(figsize=[12, 12])
+    if saveFormat.lower() == 'png':
+        fig = plt.figure(figsize=[24, 24])
+    else:
+        fig = plt.figure(figsize=[12, 12])
     ax = fig.add_subplot(1, 1, 1)
     ax.set_aspect('equal')
 
@@ -58,29 +61,30 @@ def vaScatterPlot(inputPathV, inputPathA, outputPath):
     plt.xlim([-1, 1])
     plt.ylim([-1, 1])
     # Because we moved the label position so the x,y should be on other way round
-    ax.yaxis.set_label_position("right")
-    ax.xaxis.set_label_position("top")
-    plt.xlabel("Arousal")
-    plt.ylabel("Valance")
+    ax.yaxis.set_label_position('right')
+    ax.xaxis.set_label_position('top')
+    plt.xlabel('Arousal')
+    plt.ylabel('Valance')
     # ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
     unitCircle = plt.Circle((0, 0), 1, color='r', fill=False)
     ax.add_patch(unitCircle)
     
     plt.scatter(v, a, s=2)
-    plt.savefig(outputPath, format="svg")
+    plt.savefig(outputPath+'.'+saveFormat, format=saveFormat)
     plt.close(fig)
 
 def batchPlot():
     inputPath = '../../inputFile/emotional_behaviour/'
     outputPath = '../../outputFile/RECOLA/scatter'
-    print("Plot scatter starts\r\n")
+    saveFormat = 'svg'
+    print('Plot scatter starts\r\n')
     for i in range(16, 66):
         try:
-            vaScatterPlot(inputPath+'valence/P'+str(i)+'.csv', inputPath+'arousal/P'+str(i)+'.csv', outputPath+'/P'+str(i)+'.svg')
-            print('Saving P'+str(i)+'.svg to scatter output path')
+            vaScatterPlot(inputPath+'valence/P'+str(i)+'.csv', inputPath+'arousal/P'+str(i)+'.csv', outputPath+'/P'+str(i), saveFormat)
+            print('Saving P'+str(i)+'.'+saveFormat+' to scatter output path')
         except:
             print('P'+str(i)+'.csv is missing, skipping...')
-    print("\r\nPlot scatters are finished\r\n")
+    print('\r\nPlot scatters are finished\r\n')
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     batchPlot()

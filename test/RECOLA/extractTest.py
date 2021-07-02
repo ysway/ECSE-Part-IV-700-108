@@ -20,8 +20,8 @@ def extractTest(scatterMode):
 
     fig = plt.figure(figsize=[24, 12])
     fig.suptitle('Time vs F0 of P16.wav', fontsize=16)
-    plt.xlabel("Time(s)")
-    plt.ylabel("F0 in dB(10log10)")
+    plt.xlabel('Time(s)')
+    plt.ylabel('F0 in dB(10log10)')
     if scatterMode:
         plt.scatter(t, f0Result, s=2)
     else:   
@@ -31,5 +31,5 @@ def extractTest(scatterMode):
 
     return 0
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     extractTest(False)
