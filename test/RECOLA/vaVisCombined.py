@@ -16,7 +16,7 @@ def vaVisCombinedPlot(inputPathV, inputPathA, outputPath, scatterMode, saveForma
         for i in range(1, 7):
             sumA += float(data[i])
         a.append(sumA / 6.0)
-
+        
     a = np.array(a)
 
     t = list()
@@ -33,11 +33,11 @@ def vaVisCombinedPlot(inputPathV, inputPathA, outputPath, scatterMode, saveForma
         for i in range(1, 7):
             sumA += float(data[i])
         v.append(sumA / 6.0)
-
         t.append(float(data[0]))
-    v = np.array(v)
 
+    v = np.array(v)
     t = np.array(t)
+
     plt.ioff()
     if saveFormat.lower() == 'png':
         fig = plt.figure(figsize=[48, 24])

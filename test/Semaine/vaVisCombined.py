@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import csv
 
-def vaScatterPlot(inputPathV, inputPathA, outputPath, saveFormat):
+def vaVisCombinedPlot(inputPathV, inputPathA, outputPath, scatterMode, saveFormat):
     # arousal extraction
     with open(inputPathA, 'r', newline='') as csv_file:
         reader = csv.reader(line.replace(' ', ',') for line in csv_file)
@@ -25,58 +25,42 @@ def vaScatterPlot(inputPathV, inputPathA, outputPath, saveFormat):
     csv_file.close()
     
     v = []
-    # t = list()
+    t = list()
     for data in tVSv:
         if len(data)==0:
             break
-        # t.append(float(data[0]))
+        t.append(float(data[0]))
         v.append(float(data[1]))
 
     v = np.array(v)
-    # t = np.array(t)
+    t = np.array(t)
 
-    # VA length handler
+    # TVA length handler
     if len(v)<len(a):
         a = a[:len(v)]
     elif len(v)>len(a):
         v = v[:len(a)]
-        # t = t[:len(t)]
+        t = t[:len(a)]
     else:
         pass
 
     plt.ioff()
     if saveFormat.lower() == 'png':
-        fig = plt.figure(figsize=[24, 24])
+        fig = plt.figure(figsize=[48, 24])
     else:
-        fig = plt.figure(figsize=[12, 12])
-    ax = fig.add_subplot(1, 1, 1)
-    ax.set_aspect('equal')
+        fig = plt.figure(figsize=[24, 12])
+    fig.suptitle('Time vs VA of '+inputPathV[inputPathV.rfind('/')+1:-5], fontsize=16)
+    plt.xlabel('Time(s)')
+    plt.ylabel('VA')
 
-    # Move left y-axis and bottim x-axis to centre, passing through (0,0)
-    ax.spines['left'].set_position('center')
-    ax.spines['bottom'].set_position('center')
+    if scatterMode:
+        plt.scatter(t, v, s=2, label = 'Valence')
+        plt.scatter(t, a, s=2, label = 'Arousal')
+    else:  
+        plt.plot(t, v, label = 'Valence')
+        plt.plot(t, a, label = 'Arousal')
 
-    # Eliminate upper and right axes
-    ax.spines['right'].set_color('none')
-    ax.spines['top'].set_color('none')
-
-    # Show ticks in the left and lower axes only
-    ax.xaxis.set_ticks_position('bottom')
-    ax.yaxis.set_ticks_position('left')
-
-    fig.suptitle('VA Scatter of '+inputPathV[inputPathV.rfind('/')+1:], fontsize=16)
-    plt.xlim([-1, 1])
-    plt.ylim([-1, 1])
-    # Because we moved the label position so the x,y should be on other way round
-    ax.yaxis.set_label_position('right')
-    ax.xaxis.set_label_position('top')
-    plt.xlabel('Arousal')
-    plt.ylabel('Valance')
-    # ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
-    unitCircle = plt.Circle((0, 0), 1, color='r', fill=False)
-    ax.add_patch(unitCircle)
-    
-    plt.scatter(v, a, s=2)
+    plt.legend()
     plt.savefig(outputPath+'.'+saveFormat, format=saveFormat)
     plt.close(fig)
 
@@ -87,10 +71,11 @@ def batchPlot():
     del validSessionsText
 
     inputPath = '../../inputFile/Sessions/'
-    outputPath = '../../outputFile/Semaine/scatter/'
+    outputPath = '../../outputFile/Semaine/combinedVis/'
+    scatterMode = False
     saveFormat = 'svg'
 
-    print('Plot scatter starts\r\n')
+    print('Combined visualisation plot starts\r\n')
     for session in validSessions:
         print('Session: '+session)
         for f_name in os.listdir(inputPath+session+'/'):
@@ -98,11 +83,10 @@ def batchPlot():
                 try:
                     if not os.path.exists(outputPath+session+'/'):
                         os.mkdir(outputPath+session+'/')
-                    vaScatterPlot(inputPath+session+'/'+f_name, inputPath+session+'/'+f_name[:-5]+'A.txt', outputPath+session+'/'+f_name[:-5], saveFormat)
+                    vaVisCombinedPlot(inputPath+session+'/'+f_name, inputPath+session+'/'+f_name[:-5]+'A.txt', outputPath+session+'/'+f_name[:-5], scatterMode, saveFormat)
                 except:
                     print('\tPartial file ('+f_name[:-5]+') is missing, skipping...')
-
-    print('Plot scatters are finished\r\n')
+    print('Combined visualisation plot tasks are finished\r\n')
 
 if __name__ == '__main__':
     batchPlot()
