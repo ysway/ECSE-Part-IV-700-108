@@ -81,6 +81,7 @@ def batchPlot(mode):
     print('Saving '+mode+' plots to output path\r\n')
 
 def plotVA():
+    batchPlot('arousal')
     print('='*25+'\r\n')
     batchPlot('valence')
 
