@@ -2,10 +2,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import csv
 
+
 def combinedScatterPlot():
     inputPath = '../../inputFile/emotional_behaviour/'
     outputPath = '../../outputFile/RECOLA/scatter'
-    saveFormat = 'svg'
+    saveFormat = 'png'
     a = []
     v = []
     print('Reading starts\r\n')
@@ -13,11 +14,12 @@ def combinedScatterPlot():
         try:
             # arousal extraction
             with open(inputPath+'arousal/P'+str(i)+'.csv', 'r', newline='') as csv_file:
-                reader = csv.reader(line.replace(';', ',') for line in csv_file)
+                reader = csv.reader(line.replace(';', ',')
+                                    for line in csv_file)
                 tVSa = list(reader)
             csv_file.close()
             tVSa = tVSa[1:]
-            
+
             for index, data in enumerate(tVSa):
                 sumA = 0
                 for j in range(1, 7):
@@ -27,12 +29,13 @@ def combinedScatterPlot():
 
             # valence extraction
             with open(inputPath+'valence/P'+str(i)+'.csv', 'r', newline='') as csv_file:
-                reader = csv.reader(line.replace(';', ',') for line in csv_file)
+                reader = csv.reader(line.replace(';', ',')
+                                    for line in csv_file)
                 tVSv = list(reader)
             csv_file.close()
-            
+
             tVSv = tVSv[1:]
-            
+
             for index, data in enumerate(tVSv):
                 sumA = 0
                 for j in range(1, 7):
@@ -76,12 +79,13 @@ def combinedScatterPlot():
     # ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
     unitCircle = plt.Circle((0, 0), 1, color='r', fill=False)
     ax.add_patch(unitCircle)
-    
+
     plt.scatter(v, a, s=2)
     plt.savefig(outputPath+'/combinedScatter.'+saveFormat, format=saveFormat)
     plt.close(fig)
 
     print('\r\nPlot scatters are finished\r\n')
+
 
 if __name__ == '__main__':
     combinedScatterPlot()
