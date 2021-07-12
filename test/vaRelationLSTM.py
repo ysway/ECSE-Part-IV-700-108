@@ -178,57 +178,57 @@ def plot_forecasts(series, forecasts, n_test):
 a = []
 v = []
 
-# RECOLA
-inputPath = '../inputFile/emotional_behaviour/'
-print('RECOLA Reading starts')
-for i in range(16, 66):
-    try:
-        # arousal extraction
-        with open(inputPath+'arousal/P'+str(i)+'.csv', 'r', newline='') as csv_file:
-            reader = csv.reader(line.replace(';', ',') for line in csv_file)
-            tVSa = list(reader)
-        csv_file.close()
-        tVSa = tVSa[1:]
+# # RECOLA
+# inputPath = '../inputFile/emotional_behaviour/'
+# print('RECOLA Reading starts')
+# for i in range(16, 66):
+#     try:
+#         # arousal extraction
+#         with open(inputPath+'arousal/P'+str(i)+'.csv', 'r', newline='') as csv_file:
+#             reader = csv.reader(line.replace(';', ',') for line in csv_file)
+#             tVSa = list(reader)
+#         csv_file.close()
+#         tVSa = tVSa[1:]
 
-        for index, data in enumerate(tVSa):
-            sumA = 0
-            for j in range(1, 7):
-                sumA += float(data[j])
+#         for index, data in enumerate(tVSa):
+#             sumA = 0
+#             for j in range(1, 7):
+#                 sumA += float(data[j])
 
-            a.append(sumA / 6.0)
+#             a.append(sumA / 6.0)
 
-        # valence extraction
-        with open(inputPath+'valence/P'+str(i)+'.csv', 'r', newline='') as csv_file:
-            reader = csv.reader(line.replace(';', ',') for line in csv_file)
-            tVSv = list(reader)
-        csv_file.close()
+#         # valence extraction
+#         with open(inputPath+'valence/P'+str(i)+'.csv', 'r', newline='') as csv_file:
+#             reader = csv.reader(line.replace(';', ',') for line in csv_file)
+#             tVSv = list(reader)
+#         csv_file.close()
 
-        tVSv = tVSv[1:]
+#         tVSv = tVSv[1:]
 
-        for index, data in enumerate(tVSv):
-            sumA = 0
-            for j in range(1, 7):
-                sumA += float(data[j])
+#         for index, data in enumerate(tVSv):
+#             sumA = 0
+#             for j in range(1, 7):
+#                 sumA += float(data[j])
 
-            v.append(sumA / 6.0)
-    except:
-        print('P'+str(i)+'.csv is missing, skipping...')
+#             v.append(sumA / 6.0)
+#     except:
+#         print('P'+str(i)+'.csv is missing, skipping...')
 
-# JLCorpus
-inputPath = '../inputFile/JLCorpus/all_speakers_arousal_valence.csv'
-print('\r\nJLCorpus Reading starts')
+# # JLCorpus
+# inputPath = '../inputFile/JLCorpus/all_speakers_arousal_valence.csv'
+# print('\r\nJLCorpus Reading starts')
 
-# va extraction
-with open(inputPath, 'r', newline='') as csv_file:
-    reader = csv.reader(csv_file)
-    tVSva = list(reader)
-csv_file.close()
+# # va extraction
+# with open(inputPath, 'r', newline='') as csv_file:
+#     reader = csv.reader(csv_file)
+#     tVSva = list(reader)
+# csv_file.close()
 
-tVSva = tVSva[1:]
+# tVSva = tVSva[1:]
 
-for data in tVSva:
-    v.append(float(data[2]))
-    a.append(float(data[3]))
+# for data in tVSva:
+#     v.append(float(data[2]))
+#     a.append(float(data[3]))
 
 # Semaine
 print('\r\nSemaine Reading starts')
@@ -289,23 +289,28 @@ for session in validSessions:
 print('All Readings are finished\r\n')
 
 '''
-Number of data: 7929297
-Prime Factorisation: (3**2)*347*2539
+All corpus:
+    Number of data: 7929297
+    Prime Factorisation: (3**2)*347*2539
+
+Semanie:
+
 '''
 # convert data to short save memory
-v = (np.array(v)*1000).astype(dtype='int16',copy=True, errors='raise')
-a = (np.array(a)*1000).astype(dtype='int16',copy=True, errors='raise')
+numOfVA2Use = 10**5
+v = (array(v)*1000).astype(dtype='int16',copy=True)[:numOfVA2Use]
+a = (array(a)*1000).astype(dtype='int16',copy=True)[:numOfVA2Use]
 
 # load data
 series = Series(v, index = a)
-del v, a, tVSa, tVSv, tVSva, reader, tmpList, validSessions
+del v, a, tmpList, validSessions #, tVSva, tVSa, tVSv, reader
 print(series)
 # parameter setup
-n_lag = 850       # use n_lag data
-n_seq = 191       # forecast n_seq data
-n_test = 7617    # test data is in n_test groups
+n_lag = 750     # group size is n_seq, the first (n_lag/n_seq) data will be used to predict the last (1- n_lag/n_seq) data
+n_seq = 1000    # step size of each group of data is n_seq
+n_test = 3000   # n_test data for verification
 n_epochs = 1    # train n_epochs times
-n_batch = 1     # train n_batch data a time
+n_batch = 1     # train n_batch groups at a time
 n_neurons = 1   # number of neuron knots is n_neurons
 # difference, scale, reshape data to unsupervised format
 scaler, train, test = prepare_data(series, n_test, n_lag, n_seq)

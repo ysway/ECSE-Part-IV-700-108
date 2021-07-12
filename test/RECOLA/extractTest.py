@@ -26,12 +26,12 @@ def extractTest(scatterMode):
     ##################F0##################
     f0Result = lbr.yin(x, 65, 3000, sr, frame_length=1764*4)
     
-    f0Result = 10*np.log10(f0Result)
+    f0Result = np.log10(f0Result)
 
     fig = plt.figure(figsize=[12, 6])
     fig.suptitle('Time vs F0 of P16.wav', fontsize=16)
     plt.xlabel('Time(s)')
-    plt.ylabel('F0 in dB(10log10)')
+    plt.ylabel('log of F0')
     if scatterMode:
         plt.scatter(t, f0Result, s=2)
     else:   
