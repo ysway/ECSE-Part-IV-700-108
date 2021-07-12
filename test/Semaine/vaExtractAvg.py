@@ -111,7 +111,7 @@ def sessionIterator():
             except:
                 print('\t\tCSV writing index '+str(index)+' is out of bounds')
         file.close()
-        print('\tSaving averaged session: '+session+' to output path\r\n')
+        print('Saving averaged session: '+session+' to output path\r\n')
 
     print('Averaging task has finished\r\n')
     
