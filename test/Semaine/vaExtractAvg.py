@@ -92,7 +92,7 @@ def sessionIterator():
         vaDataCountList = list()
         for f_name in os.listdir(inputPath+session+'/'):
             if f_name.endswith('V.txt'):
-                print('\tFile ID: '+f_name[:-5]+'\tLength of List:'+str(len(v)))
+                print('\tFile ID: '+f_name[:-5]+'\t\tLength of List:'+str(len(v)))
                 try:
                     tmpList = vaArrayExtractor(inputPath+session+'/'+f_name, inputPath+session+'/'+f_name[:-5]+'A.txt')
                     v, a, vaDataCountList = sumSession(v, a, tmpList[1], tmpList[2], vaDataCountList)
