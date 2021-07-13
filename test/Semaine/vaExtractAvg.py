@@ -68,6 +68,39 @@ def sumSession(oldV, oldA, newV, newA, vaDataCountList):
             a = newA+oldA[len(newV):]
     return v, a, vaDataCountList
 
+def saveAvgValues(inputPath, outputPath, talker, session, saveFormat, t, a, v, vaDataCountList):
+    outputPath = outputPath+session+'/'
+    if not os.path.exists(outputPath):
+        os.mkdir(outputPath)
+    for f_name in os.listdir(inputPath+session+'/'):
+        if (f_name.find(talker) == -1):
+            continue
+        if f_name.endswith('V.txt'):
+            print('\tFile ID: '+f_name[:-5]+'\t\tLength of List:'+str(len(v)))
+            try:
+                tmpList = vaArrayExtractor(inputPath+session+'/'+f_name, inputPath+session+'/'+f_name[:-5]+'A.txt')
+                v, a, vaDataCountList = sumSession(v, a, tmpList[1], tmpList[2], vaDataCountList)
+            except:
+                print('\t\tPartial file ('+f_name[:-5]+') is missing, skipping...')
+    if len(t) <= len(tmpList[0]):
+        t = tmpList[0]
+    del tmpList
+    # no talker session matched
+    if len(t) == 0:
+        return
+    # save to ouput path
+    file = open(outputPath+talker+saveFormat, "w", newline='', encoding='utf-8')
+    writer = csv.writer(file)
+    writer.writerow(['Time', 'Arousal', 'Valence'])
+    for index, timeStamp in enumerate(t):
+        try:
+            writer.writerow([timeStamp, round(a[index]/vaDataCountList[index], 3), round(v[index]/vaDataCountList[index], 3)])
+        except:
+            print('\t\tCSV writing index '+str(index)+' is out of bounds')
+    file.close()
+    print('Saving averaged session: '+session+' to output path\r\n')
+
+
 def sessionIterator():
     validSessionsText = open('validSessions.txt', 'r').readlines()
     validSessions = [session[:-1] for session in validSessionsText[:-1]]
@@ -75,12 +108,15 @@ def sessionIterator():
     del validSessionsText
 
     inputPath = '../../inputFile/Sessions/'
-    outputPath = '../../outputFile/Semaine/averageVA/'
+    outputPath = '../../outputFile/Semaine/TrainingInput/'
     mode = 'averageVA'
     saveFormat = '.csv'
 
+    logging = True
+
     #logging output
-    sys.stdout = open(outputPath+'0utputLog.txt', "w")
+    if logging:
+        sys.stdout = open(outputPath+'0utputLog.txt', "w")
 
     print('Reading starts\r\n')
     for session in validSessions:
@@ -90,32 +126,13 @@ def sessionIterator():
         a = list()
         v = list()
         vaDataCountList = list()
-        for f_name in os.listdir(inputPath+session+'/'):
-            if f_name.endswith('V.txt'):
-                print('\tFile ID: '+f_name[:-5]+'\t\tLength of List:'+str(len(v)))
-                try:
-                    tmpList = vaArrayExtractor(inputPath+session+'/'+f_name, inputPath+session+'/'+f_name[:-5]+'A.txt')
-                    v, a, vaDataCountList = sumSession(v, a, tmpList[1], tmpList[2], vaDataCountList)
-                except:
-                    print('\t\tPartial file ('+f_name[:-5]+') is missing, skipping...')
-        if len(t) <= len(tmpList[0]):
-            t = tmpList[0]
-        del tmpList
-        # save to ouput path
-        file = open(outputPath+session+saveFormat, "w", newline='', encoding='utf-8')
-        writer = csv.writer(file)
-        writer.writerow(['Time', 'Arousal', 'Valence'])
-        for index, timeStamp in enumerate(t):
-            try:
-                writer.writerow([timeStamp, round(a[index]/vaDataCountList[index], 3), round(v[index]/vaDataCountList[index], 3)])
-            except:
-                print('\t\tCSV writing index '+str(index)+' is out of bounds')
-        file.close()
-        print('Saving averaged session: '+session+' to output path\r\n')
+        saveAvgValues(inputPath, outputPath, 'TU', session, saveFormat, t, a, v, vaDataCountList) # User
+        saveAvgValues(inputPath, outputPath, 'TO', session, saveFormat, t, a, v, vaDataCountList) # Operator
 
     print('Averaging task has finished\r\n')
     
-    sys.stdout.close()
+    if logging:
+        sys.stdout.close()
 
 if __name__ == '__main__':
     sessionIterator()
