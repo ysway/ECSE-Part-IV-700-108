@@ -70,6 +70,7 @@ def sumSession(oldV, oldA, newV, newA, vaDataCountList):
 
 def saveAvgValues(inputPath, outputPath, talker, session, saveFormat, t, a, v, vaDataCountList):
     outputPath = outputPath+session+'/'
+    tmpList = list()
     if not os.path.exists(outputPath):
         os.mkdir(outputPath)
     for f_name in os.listdir(inputPath+session+'/'):
