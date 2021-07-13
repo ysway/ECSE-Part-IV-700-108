@@ -83,12 +83,12 @@ def saveAvgValues(inputPath, outputPath, talker, session, saveFormat, t, a, v, v
                 v, a, vaDataCountList = sumSession(v, a, tmpList[1], tmpList[2], vaDataCountList)
             except:
                 print('\t\tPartial file ('+f_name[:-5]+') is missing, skipping...')
+                # no talker session matched
+    if len(tmpList) == 0:
+        return
     if len(t) <= len(tmpList[0]):
         t = tmpList[0]
     del tmpList
-    # no talker session matched
-    if len(t) == 0:
-        return
     # save to ouput path
     file = open(outputPath+talker+saveFormat, "w", newline='', encoding='utf-8')
     writer = csv.writer(file)
