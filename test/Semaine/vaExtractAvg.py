@@ -57,12 +57,12 @@ def sumSession(oldV, oldA, newV, newA, vaDataCountList):
                     vaDataCountList.append(1)
             except:
                 vaDataCountList.append(1)
-                print('\t\tOld V: Summing index '+str(index)+' is out of bounds, appending new V')
+                print('\t\t\tOld V: Summing index '+str(index)+' is out of bounds, appending new V')
         for index, data in enumerate(newA):
             try:
                 newA[index] = oldA[index]+data
             except:
-                print('\t\tOld A: Summing index '+str(index)+' is out of bounds, appending new A')
+                print('\t\t\tOld A: Summing index '+str(index)+' is out of bounds, appending new A')
 
             v = newV+oldV[len(newV):]
             a = newA+oldA[len(newV):]
@@ -70,6 +70,7 @@ def sumSession(oldV, oldA, newV, newA, vaDataCountList):
 
 def saveAvgValues(inputPath, outputPath, talker, session, saveFormat, t, a, v, vaDataCountList):
     outputPath = outputPath+session+'/'
+    print('\tMode: '+talker)
     tmpList = list()
     if not os.path.exists(outputPath):
         os.mkdir(outputPath)
@@ -77,12 +78,12 @@ def saveAvgValues(inputPath, outputPath, talker, session, saveFormat, t, a, v, v
         if (f_name.find(talker) == -1):
             continue
         if f_name.endswith('V.txt'):
-            print('\tFile ID: '+f_name[:-5]+'\t\tLength of List:'+str(len(v)))
+            print('\t\tFile ID: '+f_name[:-5]+'\t\tLength of List:'+str(len(v)))
             try:
                 tmpList = vaArrayExtractor(inputPath+session+'/'+f_name, inputPath+session+'/'+f_name[:-5]+'A.txt')
                 v, a, vaDataCountList = sumSession(v, a, tmpList[1], tmpList[2], vaDataCountList)
             except:
-                print('\t\tPartial file ('+f_name[:-5]+') is missing, skipping...')
+                print('\t\t\tPartial file ('+f_name[:-5]+') is missing, skipping...')
                 # no talker session matched
     if len(tmpList) == 0:
         return
@@ -99,8 +100,6 @@ def saveAvgValues(inputPath, outputPath, talker, session, saveFormat, t, a, v, v
         except:
             print('\t\tCSV writing index '+str(index)+' is out of bounds')
     file.close()
-    print('Saving averaged session: '+session+' to output path\r\n')
-
 
 def sessionIterator():
     validSessionsText = open('validSessions.txt', 'r').readlines()
@@ -129,7 +128,7 @@ def sessionIterator():
         vaDataCountList = list()
         saveAvgValues(inputPath, outputPath, 'TU', session, saveFormat, t, a, v, vaDataCountList) # User
         saveAvgValues(inputPath, outputPath, 'TO', session, saveFormat, t, a, v, vaDataCountList) # Operator
-
+        print('Saving averaged session: '+session+' to output path\r\n')
     print('Averaging task has finished\r\n')
     
     if logging:
