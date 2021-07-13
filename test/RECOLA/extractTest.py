@@ -1,7 +1,6 @@
 from librosa import display
 import librosa as lbr
 import matplotlib.pyplot as plt
-from math import log10
 import numpy as np
 
 # The lengths of outputs should be 7501 to match the same length of lines of input csv files
@@ -34,7 +33,7 @@ def extractTest(scatterMode):
     plt.ylabel('log of F0')
     if scatterMode:
         plt.scatter(t, f0Result, s=2)
-    else:   
+    else:
         plt.plot(t, f0Result)
     plt.show()
 

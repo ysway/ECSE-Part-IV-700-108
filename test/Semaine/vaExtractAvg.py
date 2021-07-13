@@ -91,7 +91,7 @@ def saveAvgValues(inputPath, outputPath, talker, session, saveFormat, t, a, v, v
         t = tmpList[0]
     del tmpList
     # save to ouput path
-    file = open(outputPath+talker+saveFormat, "w", newline='', encoding='utf-8')
+    file = open(outputPath+talker+'_VA'+saveFormat, "w", newline='', encoding='utf-8')
     writer = csv.writer(file)
     writer.writerow(['Time', 'Arousal', 'Valence'])
     for index, timeStamp in enumerate(t):
