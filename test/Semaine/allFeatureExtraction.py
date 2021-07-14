@@ -52,7 +52,7 @@ def audioIterator(talker, inputPath, outputPath, saveFormat):
     else:
         pass
     for f_name in os.listdir(inputPath):
-        if (f_name.find(audioKeyWord) != -1) & f_name.endswith('.wav'):
+        if (f_name.find(audioKeyWord) != -1) and f_name.endswith('.wav'):
             tmpInputPath = inputPath+f_name
             tmpOutputPath = outputPath+talker+'_Features'+saveFormat
             featureExtract(tmpInputPath, tmpOutputPath)
