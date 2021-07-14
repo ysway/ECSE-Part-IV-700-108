@@ -36,7 +36,7 @@ def featureExtract(inputPath, outputPath):
     mfccResult = mfccResult[0]
     # MFCC tmp operation <==================================================================
     
-    print("t: %d\trms: %d\tf0: %d\tmfcc: %d" % (len(t), len(rms), len(f0Log10Result), len(mfccResult)))
+    print("\t\tt: %d\trms: %d\tf0: %d\tmfcc: %d" % (len(t), len(rms), len(f0Log10Result), len(mfccResult)))
 
     for index, timeStamp in enumerate(t):
         writer.writerow([timeStamp, rms[index], f0Log10Result[index], mfccResult[index]])
@@ -45,8 +45,10 @@ def featureExtract(inputPath, outputPath):
 def audioIterator(talker, inputPath, outputPath, saveFormat):
     if talker == 'TO':
         audioKeyWord = 'Operator HeadMounted'
+        print('\tOperator:')
     elif talker == 'TU':
         audioKeyWord = 'User HeadMounted'
+        print('\tUser:')
     else:
         pass
     for f_name in os.listdir(inputPath):
