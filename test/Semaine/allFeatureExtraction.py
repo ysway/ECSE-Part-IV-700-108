@@ -43,6 +43,15 @@ def featureExtract(inputPath, outputPath):
     file.close()
 
 def audioIterator(talker, inputPath, outputPath, saveFormat):
+    talkFlag = False
+    for f_name in os.listdir(inputPath):
+        if (f_name.find(talker) != -1):
+            talkFlag = True
+            break
+    
+    if not talkFlag:
+        return
+
     if talker == 'TO':
         audioKeyWord = 'Operator HeadMounted'
         print('\tOperator:')
@@ -51,8 +60,9 @@ def audioIterator(talker, inputPath, outputPath, saveFormat):
         print('\tUser:')
     else:
         pass
+
     for f_name in os.listdir(inputPath):
-        if (f_name.find(audioKeyWord) != -1) & (f_name.find(talker) != -1) and f_name.endswith('.wav'):
+        if talkFlag & (f_name.find(audioKeyWord) != -1) and f_name.endswith('.wav'):
             tmpInputPath = inputPath+f_name
             tmpOutputPath = outputPath+talker+'_Features'+saveFormat
             featureExtract(tmpInputPath, tmpOutputPath)
