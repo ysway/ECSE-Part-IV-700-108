@@ -6,7 +6,7 @@ def featureExtract(inputPath, outputPath):
     # parameters of 20ms window under 48kHZ
     samplingRate = 48000
     frameLength = 960
-    mfccNum = 40
+    mfccNum = 1
 
     x, sr = lbr.load(inputPath, sr=samplingRate, mono=True)
     frames = range(len(x)//frameLength+1)
