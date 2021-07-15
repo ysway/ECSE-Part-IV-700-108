@@ -6,7 +6,7 @@ def featureExtract(inputPath, outputPath):
     # parameters of 20ms window under 48kHZ
     samplingRate = 48000
     frameLength = 960
-    mfccNum = 40
+    mfccNum = 5
 
     x, sr = lbr.load(inputPath, sr=samplingRate, mono=True)
     frames = range(len(x)//frameLength+1)
@@ -23,23 +23,25 @@ def featureExtract(inputPath, outputPath):
     mfccResult = lbr.feature.mfcc(x, sr=sr, n_mfcc=mfccNum, hop_length=frameLength)
 
     # save to ouput path
+    mfccTitle = list()
+    for num in range(mfccNum):
+        mfccTitle.append('MFCC'+str(num+1))
     file = open(outputPath, "w", newline='', encoding='utf-8')
     writer = csv.writer(file)
-    writer.writerow(['Time', 'RMS', 'F0Log10', 'MFCC'])
+    writer.writerow(['Time', 'RMS', 'F0Log10']+mfccTitle)
     # remove first row, as Semaine starts from 0.02
     t = t[1:]
     rms = rms[1:]
     f0Log10Result = f0Log10Result[1:]
     mfccResult = np.delete(arr=mfccResult, obj=0, axis=1)
 
-    # MFCC tmp operation <==================================================================
-    mfccResult = mfccResult[0]
-    # MFCC tmp operation <==================================================================
-    
-    print("\t\tt: %d\trms: %d\tf0: %d\tmfcc: %d" % (len(t), len(rms), len(f0Log10Result), len(mfccResult)))
+    print("\t\tt: %d\trms: %d\tf0: %d\tmfcc: %d" % (len(t), len(rms), len(f0Log10Result), len(mfccResult[0])))
 
     for index, timeStamp in enumerate(t):
-        writer.writerow([timeStamp, rms[index], f0Log10Result[index], mfccResult[index]])
+        mfccWrite = list()
+        for data in mfccResult:
+            mfccWrite.append(data[index])
+        writer.writerow([timeStamp, rms[index], f0Log10Result[index]]+mfccWrite)
     file.close()
 
 def audioIterator(talker, inputPath, outputPath, saveFormat):
