@@ -4,12 +4,12 @@ from numpy import std
 from numpy import dstack
 import numpy as np
 from pandas import read_csv
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.layers import Flatten
-from keras.layers import Dropout
-from keras.layers import LSTM
-from keras.utils import to_categorical
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import Flatten
+from tensorflow.keras.layers import Dropout
+from tensorflow.keras.layers import LSTM
+from tensorflow.keras.utils import to_categorical
 from matplotlib import pyplot
 
 def main():

@@ -56,13 +56,14 @@ def vaScatterPlot(inputPath, outputPath, saveFormat):
     plt.close(fig)
 
 def batchPlot():
-    inputPath = '../../inputFile/JLCroups/'
-    outputPath = '../../outputFile/JLCroups/scatter/'
-    saveFormat = 'svg'
+    inputPath = '../../inputFile/JLCorpus/'
+    outputPath = '../../outputFile/JLCorpus/scatter/'
+    saveFormat = 'png'
     print('Plot scatter starts\r\n')
     vaScatterPlot(inputPath+'female1_arousal_valence.csv', outputPath+'female1_arousal_valence', saveFormat)
     vaScatterPlot(inputPath+'female2_arousal_valence.csv', outputPath+'female2_arousal_valence', saveFormat)
     vaScatterPlot(inputPath+'male1_arousal_valence.csv', outputPath+'male1_arousal_valence', saveFormat)
+    vaScatterPlot(inputPath+'male2_arousal_valence.csv', outputPath+'male2_arousal_valence', saveFormat)
     vaScatterPlot(inputPath+'male2_arousal_valence.csv', outputPath+'male2_arousal_valence', saveFormat)
     print('\r\nPlot scatters are finished\r\n')
 
