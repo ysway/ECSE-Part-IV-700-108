@@ -13,8 +13,8 @@ def vaScatterPlot(inputPath, outputPath, saveFormat):
     v = []
     a = []
     for data in tVSva:
-        v.append(float(data[1]))
-        a.append(float(data[2]))
+        v.append(float(data[2]))
+        a.append(float(data[3]))
 
     v = np.array(v)
     a = np.array(a)
@@ -60,10 +60,7 @@ def batchPlot():
     outputPath = '../../outputFile/JLCorpus/scatter/'
     saveFormat = 'png'
     print('Plot scatter starts\r\n')
-    vaScatterPlot(inputPath+'female1_arousal_valence.csv', outputPath+'female1_arousal_valence', saveFormat)
-    vaScatterPlot(inputPath+'female2_arousal_valence.csv', outputPath+'female2_arousal_valence', saveFormat)
-    vaScatterPlot(inputPath+'male1_arousal_valence.csv', outputPath+'male1_arousal_valence', saveFormat)
-    vaScatterPlot(inputPath+'male2_arousal_valence.csv', outputPath+'male2_arousal_valence', saveFormat)
+    vaScatterPlot(inputPath+'all_speakers_arousal_valence.csv', outputPath+'all_speakers_arousal_valence', saveFormat)
     print('\r\nPlot scatters are finished\r\n')
 
 if __name__ == '__main__':
