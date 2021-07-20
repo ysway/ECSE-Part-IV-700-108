@@ -49,8 +49,8 @@ def vaVisualisation(inputPath, outputPath):
     vaPlot(inputPath, outputPath, 'arousal', t, a)
 
 def batchPlot():
-    inputPath = '../../inputFile/JLCroups/'
-    outputPath = '../../outputFile/JLCroups/'
+    inputPath = '../../inputFile/JLCorpus/'
+    outputPath = '../../outputFile/JLCorpus/'
     saveFormat = 'svg'
     print('Plot starts\r\n')
     vaVisualisation(inputPath+'female1_arousal_valence.csv', outputPath+'/female1_arousal_valence', saveFormat)
