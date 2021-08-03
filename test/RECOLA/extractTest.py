@@ -5,7 +5,7 @@ import numpy as np
 
 # The lengths of outputs should be 7501 to match the same length of lines of input csv files
 def extractTest(scatterMode):
-    testAudioInput = '../../inputFile/P16.wav'
+    testAudioInput = '../../inputFile/emotional_behaviour/RECOLA-Audio-recordings/P16.wav'
     x, sr = lbr.load(testAudioInput, sr=44100, mono=True)
 
     frame_length = 1764
