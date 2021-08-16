@@ -2,6 +2,36 @@ import os
 import numpy as np
 import pandas as pd
 import librosa as lbr
+from pydub import AudioSegment, silence
+
+def silenceStampExtract(audioPath, length):
+    myaudio = AudioSegment.from_wav(audioPath)
+    slc = silence.detect_silence(myaudio, min_silence_len=1000, silence_thresh=-32)
+    slc = [((start/1000),(stop/1000)) for start,stop in slc] # convert to sec
+    slc = np.array([item for sublist in slc for item in sublist]) # flatten
+    slc = np.around(slc, 2) # keep 2 dp
+    slc = (slc*100-slc*100%4)/100 # evaluate points to nearest previous 40ms stamp
+    # Tag filling
+    tagList = list()
+    slc = np.append(slc, 9999) # use length to determine the end
+    time = 0.00
+    idx = 0
+    if slc[0] == 0:
+        # filling start with Stag = 'S'
+        tag = 'S'
+        idx += 1
+    else:
+        # filling start with Stag = 'V'
+        tag = 'V'
+    for i in range(length):
+        if round(time,2) >= slc[idx]:
+            idx += 1
+            tag = 'V' if (idx % 2 == 0) else 'S'
+        else:
+            pass
+        tagList.append(tag)
+        time += 0.04
+    return pd.DataFrame(tagList, columns=['voiceTag'])
 
 def vaAvg(df, VA):
     df['Time'] = df['time']
@@ -57,18 +87,20 @@ def main():
                 currentDf = vaAvg(pd.read_csv(os.path.join(dir, file), sep=';'), 'Valence')
             elif dir.find('recordings') != -1:
                 currentDf = featureExtract(os.path.join(dir, file))
+                tagDf = silenceStampExtract(os.path.join(dir, file), currentDf.shape[0])
+                currentDf.join(tagDf)
             else:
                 continue
 
             if keyName in dataDict:
                 dataDict[keyName] = dataDict[keyName].join(currentDf.drop(['Time'], axis=1))
             else:
-                dataDict[keyName]  =  currentDf
+                dataDict[keyName] = currentDf
 
     print('Saving dataframe to output path')
     for key in dataDict:
         valence = dataDict[key].pop('Valence')
-        dataDict[key].insert(2, valence.name, valence)
+        dataDict[key].insert(-1, valence.name, valence)
         dataDict[key].to_csv(outputPath+'reco00'+key[1:]+'pp.csv', index=False)
     
     print('Tasks are completed')
