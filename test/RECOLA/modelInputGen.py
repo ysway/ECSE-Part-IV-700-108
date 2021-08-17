@@ -24,7 +24,7 @@ def silenceStampExtract(audioPath, length):
         # filling start with Stag = 'V'
         tag = 'V'
     for i in range(length):
-        if round(time,2) >= slc[idx]:
+        if time >= slc[idx]:
             idx += 1
             tag = 'V' if (idx % 2 == 0) else 'S'
         else:
@@ -88,7 +88,7 @@ def main():
             elif dir.find('recordings') != -1:
                 currentDf = featureExtract(os.path.join(dir, file))
                 tagDf = silenceStampExtract(os.path.join(dir, file), currentDf.shape[0])
-                currentDf.join(tagDf)
+                currentDf = currentDf.join(tagDf)
             else:
                 continue
 
@@ -100,7 +100,7 @@ def main():
     print('Saving dataframe to output path')
     for key in dataDict:
         valence = dataDict[key].pop('Valence')
-        dataDict[key].insert(-1, valence.name, valence)
+        dataDict[key].insert(1, valence.name, valence)
         dataDict[key].to_csv(outputPath+'reco00'+key[1:]+'pp.csv', index=False)
     
     print('Tasks are completed')

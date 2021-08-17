@@ -1,6 +1,37 @@
 import sys, os, csv
-import librosa as lbr
 import numpy as np
+import librosa as lbr
+from pydub import AudioSegment, silence
+
+def silenceStampExtract(audioPath, length):
+    myaudio = AudioSegment.from_wav(audioPath)
+    # by listening the audio and checking the db meter, the maximum volume of other talker is -50db
+    slc = silence.detect_silence(myaudio, min_silence_len=750, silence_thresh=-50)
+    slc = [((start/1000),(stop/1000)) for start,stop in slc] # convert to sec
+    slc = np.array([item for sublist in slc for item in sublist]) # flatten
+    slc = np.around(slc, 2) # keep 2 dp
+    slc = (slc*100-slc*100%2)/100 # evaluate points to nearest previous 20ms stamp
+    # Tag filling
+    tagList = list()
+    slc = np.append(slc, 9999) # use length to determine the end
+    time = 0.00
+    idx = 0
+    if slc[0] == 0:
+        # filling start with Stag = 'S'
+        tag = 'S'
+        idx += 1
+    else:
+        # filling start with Stag = 'V'
+        tag = 'V'
+    for i in range(length):
+        if round(time, 2) >= slc[idx]:
+            idx += 1
+            tag = 'V' if (idx % 2 == 0) else 'S'
+        else:
+            pass
+        tagList.append(tag)
+        time += 0.02
+    return np.array(tagList)
 
 def featureExtract(inputPath, outputPath):
     # parameters of 20ms window under 48kHZ
@@ -22,26 +53,29 @@ def featureExtract(inputPath, outputPath):
     ##################MFCC##################
     mfccResult = lbr.feature.mfcc(x, sr=sr, n_mfcc=mfccNum, hop_length=frameLength)
 
+    #################VoiceTag###############
+    tagList = silenceStampExtract(inputPath, t.shape[0]-1)
+
     # save to ouput path
     mfccTitle = list()
     for num in range(mfccNum):
         mfccTitle.append('MFCC'+str(num+1))
     file = open(outputPath, "w", newline='', encoding='utf-8')
     writer = csv.writer(file)
-    writer.writerow(['Time', 'RMS', 'F0Log10']+mfccTitle)
+    writer.writerow(['Time', 'RMS', 'F0Log10']+mfccTitle+['voiceTag'])
     # remove first row, as Semaine starts from 0.02
     t = t[1:]
     rms = rms[1:]
     f0Log10Result = f0Log10Result[1:]
     mfccResult = np.delete(arr=mfccResult, obj=0, axis=1)
 
-    print("\t\tt: %d\trms: %d\tf0: %d\tmfcc: %d" % (len(t), len(rms), len(f0Log10Result), len(mfccResult[0])))
+    print("\t\tt: %d\trms: %d\tf0: %d\tmfcc: %d\tvoice tag: %d" % (len(t), len(rms), len(f0Log10Result), len(mfccResult[0]), tagList.shape[0]))
 
     for index, timeStamp in enumerate(t):
         mfccWrite = list()
         for data in mfccResult:
             mfccWrite.append(data[index])
-        writer.writerow([timeStamp, rms[index], f0Log10Result[index]]+mfccWrite)
+        writer.writerow([timeStamp, rms[index], f0Log10Result[index]]+mfccWrite+[tagList[index]])
     file.close()
 
 def audioIterator(talker, inputPath, outputPath, saveFormat):
@@ -78,7 +112,6 @@ def sessionIterator():
 
     inputPath = '../../inputFile/Sessions/'
     outputPath = '../../outputFile/Semaine/TrainingInput/'
-    mode = 'averageVA'
     saveFormat = '.csv'
 
     logging = False

@@ -109,7 +109,6 @@ def sessionIterator():
 
     inputPath = '../../inputFile/Sessions/'
     outputPath = '../../outputFile/Semaine/TrainingInput/'
-    mode = 'averageVA'
     saveFormat = '.csv'
 
     logging = True
