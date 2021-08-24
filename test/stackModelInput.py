@@ -12,8 +12,10 @@ def main():
     resultUnpadDF = pd.DataFrame()
 
     for dir, _, filenames in os.walk(IOPath):
-        filenames.remove('allFileCombineU.csv')
-        filenames.remove('allFileCombineP.csv')
+        try:
+            filenames.remove('allFileCombineU.csv'); filenames.remove('allFileCombineP.csv');
+        except:
+            pass
         for file in filenames:
             currentDF = pd.read_csv(os.path.join(dir, file), sep=',')
             

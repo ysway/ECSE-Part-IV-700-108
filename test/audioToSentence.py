@@ -24,7 +24,10 @@ def a2s():
     for dir, _, filenames in os.walk(inputPath):
         if (dir.find('sentences') != -1):
             continue
-        filenames.remove('allFileCombineU.csv'); filenames.remove('allFileCombineP.csv');
+        try:
+            filenames.remove('allFileCombineU.csv'); filenames.remove('allFileCombineP.csv');
+        except:
+            pass
         for file in filenames:
             count = 0
             currentDf = pd.DataFrame()
