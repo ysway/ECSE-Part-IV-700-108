@@ -18,7 +18,7 @@ bEnd = base64.b64encode(bytes(bEnd, 'utf-8'))
 def a2s():
     inputPath = '../inputFile/modelInput/'
     outputPath = '../inputFile/modelInput/sentences/'
-    eval(compile(base64.b64decode(bStart), "<string>", 'exec'))
+    eval(compile(base64.b64decode(bStart), '<string>', 'exec'))
     sentencesTuple = namedtuple('Sentences', ['Time', 'Valence', 'Arousal', 'RMS', 'F0Log10', 'MFCC1' , 'MFCC2' , 'MFCC3', 'MFCC4', 'MFCC5'])
     lengthDistributionDf = pd.DataFrame()
     for dir, _, filenames in os.walk(inputPath):
@@ -50,7 +50,7 @@ def a2s():
                     count += 1
                     # write to dict
                     currentDf.to_csv(outputPath+currentName+'.csv', index=False)
-                    lengthDistributionDf = pd.concat([lengthDistributionDf, pd.DataFrame({"Name": [currentName], "Length":[currentDf.shape[0]]})])
+                    lengthDistributionDf = pd.concat([lengthDistributionDf, pd.DataFrame({'Name': [currentName], 'Length':[currentDf.shape[0]]})])
                     # empty df
                     currentDf = pd.DataFrame()
                 else:
@@ -60,12 +60,12 @@ def a2s():
             if (currentDf.shape[0] >= min_length):
                 currentName = fileName+str(count).zfill(3);
                 currentDf.to_csv(outputPath+currentName+'.csv', index=False)
-                lengthDistributionDf = pd.concat([lengthDistributionDf, pd.DataFrame({"Name": [currentName], "Length":[currentDf.shape[0]]})])
+                lengthDistributionDf = pd.concat([lengthDistributionDf, pd.DataFrame({'Name': [currentName], 'Length':[currentDf.shape[0]]})])
             else:
                 pass
 
-    lengthDistributionDf.to_csv(outputPath+"lengthDistribution"+'.csv', index=False)
-    eval(compile(base64.b64decode(bEnd), "<string>", 'exec'))
+    lengthDistributionDf.to_csv(outputPath+'lengthDistribution'+'.csv', index=False)
+    eval(compile(base64.b64decode(bEnd), '<string>', 'exec'))
 
 if __name__ == '__main__':
     a2s()
