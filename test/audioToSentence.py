@@ -27,6 +27,7 @@ def a2s():
         if (dir.find('sentences') != -1):
             continue
         try:
+            filenames.remove('jlco0000st.csv')
             filenames.remove('allFileCombineU.csv')
             filenames.remove('allFileCombineP.csv')
         except:
