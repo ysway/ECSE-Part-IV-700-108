@@ -2,12 +2,9 @@ import os
 import pandas as pd
 
 # make it const
-
-
 def getPadSize():
     PAD_SIZE = 30500
     return PAD_SIZE
-
 
 def main():
     IOPath = "../inputFile/modelInput/"
@@ -17,6 +14,12 @@ def main():
     for dir, _, filenames in os.walk(IOPath):
         if (dir.find('sentences') != -1):
             continue
+        else:
+            pass
+        try:
+            filenames.remove('jlco0000st')
+        except:
+            pass
         try:
             filenames.remove('allFileCombineU.csv')
             filenames.remove('allFileCombineP.csv')
@@ -36,7 +39,6 @@ def main():
 
     resultUnpadDF.to_csv(IOPath+'allFileCombineU.csv', index=False)
     resultPadDF.to_csv(IOPath+'allFileCombineP.csv', index=False)
-
 
 if __name__ == '__main__':
     main()

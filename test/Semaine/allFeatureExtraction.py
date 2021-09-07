@@ -5,7 +5,6 @@ import numpy as np
 import librosa as lbr
 from pydub import AudioSegment, silence
 
-
 def silenceStampExtract(audioPath, length):
     myaudio = AudioSegment.from_wav(audioPath)
     # by listening the audio and checking the db meter, the maximum volume of other talker is -50db
@@ -39,7 +38,6 @@ def silenceStampExtract(audioPath, length):
         time += 0.02
     return np.array(tagList)
 
-
 def featureExtract(inputPath, outputPath):
     # parameters of 20ms window under 48kHZ
     samplingRate = 48000
@@ -51,16 +49,14 @@ def featureExtract(inputPath, outputPath):
     t = lbr.frames_to_time(frames, sr=sr, hop_length=frameLength)
 
     ##################Energy##################
-    rms = ((lbr.feature.rms(x, frame_length=frameLength,
-           hop_length=frameLength, center=True))[0])
+    rms = ((lbr.feature.rms(x, frame_length=frameLength, hop_length=frameLength, center=True))[0])
     rms = 20*np.log10(rms)
 
     ##################F0##################
     f0Result = lbr.yin(x, 50, 300, sr, frame_length=frameLength*4)
 
     ##################MFCC##################
-    mfccResult = lbr.feature.mfcc(
-        x, sr=sr, n_mfcc=mfccNum, hop_length=frameLength)
+    mfccResult = lbr.feature.mfcc(x, sr=sr, n_mfcc=mfccNum, hop_length=frameLength)
 
     #################VoiceTag###############
     tagList = silenceStampExtract(inputPath, t.shape[0]-1)
@@ -71,24 +67,21 @@ def featureExtract(inputPath, outputPath):
         mfccTitle.append('MFCC'+str(num+1))
     file = open(outputPath, "w", newline='', encoding='utf-8')
     writer = csv.writer(file)
-    writer.writerow(['Time', 'RMS(dB)', 'F0']+mfccTitle+['voiceTag'])
+    writer.writerow(['Time', 'RMS', 'F0']+mfccTitle+['voiceTag'])
     # remove first row, as Semaine starts from 0.02
     t = t[1:]
     rms = rms[1:]
     f0Result = f0Result[1:]
     mfccResult = np.delete(arr=mfccResult, obj=0, axis=1)
 
-    print("\t\tt: %d\trms: %d\tf0: %d\tmfcc: %d\tvoice tag: %d" %
-          (len(t), len(rms), len(f0Result), len(mfccResult[0]), tagList.shape[0]))
+    print("\t\tt: %d\trms: %d\tf0: %d\tmfcc: %d\tvoice tag: %d" % (len(t), len(rms), len(f0Result), len(mfccResult[0]), tagList.shape[0]))
 
     for index, timeStamp in enumerate(t):
         mfccWrite = list()
         for data in mfccResult:
             mfccWrite.append(data[index])
-        writer.writerow([timeStamp, rms[index], f0Result[index]
-                         ]+mfccWrite+[tagList[index]])
+        writer.writerow([timeStamp, rms[index], f0Result[index]]+mfccWrite+[tagList[index]])
     file.close()
-
 
 def audioIterator(talker, inputPath, outputPath, saveFormat):
     talkFlag = False
@@ -116,7 +109,6 @@ def audioIterator(talker, inputPath, outputPath, saveFormat):
             featureExtract(tmpInputPath, tmpOutputPath)
             del tmpInputPath, tmpOutputPath
 
-
 def sessionIterator():
     validSessionsText = open('validSessions.txt', 'r').readlines()
     validSessions = [session[:-1] for session in validSessionsText[:-1]]
@@ -141,15 +133,13 @@ def sessionIterator():
         if not os.path.exists(outputPath):
             os.mkdir(outputPath)
         audioIterator('TU', tmpInputPath, tmpOutputPath, saveFormat)  # User
-        audioIterator('TO', tmpInputPath, tmpOutputPath,
-                      saveFormat)  # Operator
+        audioIterator('TO', tmpInputPath, tmpOutputPath, saveFormat)  # Operator
         del tmpInputPath, tmpOutputPath
         print('Saving averaged session: '+session+' to output path\r\n')
     print('Averaging task has finished\r\n')
 
     if logging:
         sys.stdout.close()
-
 
 if __name__ == '__main__':
     sessionIterator()

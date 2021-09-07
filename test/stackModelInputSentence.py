@@ -12,6 +12,10 @@ def main():
     resultUnpadDF = pd.DataFrame()
 
     for dir, _, filenames in os.walk(IOPath):
+        if (dir.find('plots') != -1):
+            continue
+        else:
+            pass
         try:
             filenames.remove('allFileCombineU.csv'); filenames.remove('allFileCombineP.csv');
         except:
