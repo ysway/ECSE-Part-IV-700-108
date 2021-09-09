@@ -1,9 +1,18 @@
+# Add a new cell，type '# %%'
+# Add a new markdown cell，type '# %% [markdown]'
+# %% [markdown]
+# # This file is for RECOLA, it will generate appropriated csv file in 20ms length that can be directly used by ML
+# 
+
+# %%
 import os
 import numpy as np
 import pandas as pd
 import librosa as lbr
 from pydub import AudioSegment, silence
 
+
+# %%
 def silenceStampExtract(audioPath, length):
     myaudio = AudioSegment.from_wav(audioPath)
     slc = silence.detect_silence(myaudio, min_silence_len=1000, silence_thresh=-32)
@@ -30,18 +39,40 @@ def silenceStampExtract(audioPath, length):
         else:
             pass
         tagList.append(tag)
-        time += 0.04
+        time += 0.02
     return pd.DataFrame(tagList, columns=['voiceTag'])
 
+
+# %%
+def linearInterpolation(df):
+    # old df len: 2, [0 40ms]
+    # new df len: 3, [0 20ms 40ms]
+    newLen = df.shape[0] * 2 - 1
+    newDf = df[0:0]
+    for i in range(newLen):
+        if (i % 2 == 0):
+            newDf = newDf.append(df[i//2:i//2+1], ignore_index=True)
+        else:
+            interpolation = ((np.array(df[(i+1)//2-1:(i+1)//2]) + np.array(df[(i+1)//2:(i+1)//2+1])) / 2)
+            newDf = newDf.append(pd.DataFrame(interpolation.reshape(1,-1), columns=list(df)), ignore_index=True)
+    # the length of new df will always be odd
+    return newDf
+
+
+# %%
 def vaAvg(df, VA):
     df['Time'] = df['time']
     df[VA] = df.iloc[:, 1:-1].sum(axis=1)/6
-    return df[['Time', VA]]
+    dfVA = linearInterpolation(df[[VA]])
+    dfTime = np.around(linearInterpolation(df[['Time']]), 2)
+    return dfTime.join(dfVA)
 
+
+# %%
 def featureExtract(audioFile):
-    # parameters of 40ms window under 44.1kHZ
+    # parameters of 20ms window under 44.1kHZ
     samplingRate = 44100
-    frameLength = 1764
+    frameLength = 882
     mfccNum = 5
 
     x, sr = lbr.load(audioFile, sr=samplingRate, mono=True)
@@ -64,7 +95,7 @@ def featureExtract(audioFile):
     dfR = pd.DataFrame(rms, columns=['RMS'])
     dfF = pd.DataFrame(f0Result, columns=['F0'])
     
-    # MFCC Title 
+    # MFCC Title
     mfccTitle = list()
     for num in range(mfccNum):
         mfccTitle.append('MFCC'+str(num+1))
@@ -72,6 +103,9 @@ def featureExtract(audioFile):
 
     return dfT.join(dfR).join(dfF).join(dfM)
 
+
+# %%
+# Main program entry
 def main():
     inputPath = '../../inputFile/emotional_behaviour/'
     outputPath = '../../inputFile/modelInput/'
