@@ -17,7 +17,7 @@ def main():
         else:
             pass
         try:
-            filenames.remove('allFileCombineU.csv'); filenames.remove('allFileCombineP.csv');
+            filenames.remove('allFileCombineSentenceU.csv'); filenames.remove('allFileCombineSentenceP.csv');
         except:
             pass
         try:
