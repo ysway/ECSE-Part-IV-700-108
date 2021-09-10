@@ -40,8 +40,9 @@ def main():
                 # front pad zeros
                 resultPadDF = resultPadDF.append(padDf, ignore_index=True)
                 resultPadDF = resultPadDF.append(currentDF, ignore_index=True)
-
-            del diff, currentDF, padDf
+                del padDf
+                
+            del diff, currentDF
 
     resultUnpadDF.to_csv(IOPath+'allFileCombineU.csv', index=False)
     resultPadDF.to_csv(IOPath+'allFileCombineP.csv', index=False)
