@@ -16,6 +16,8 @@ def timeTag():
     # YYmmddHHMM
     return datetime.now().strftime('[%Y%m%d%H%M]')
 
+tTag = timeTag()
+
 # prepare data for lstms
 def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
     n_vars = 1 if type(data) is list else data.shape[1]
@@ -76,7 +78,6 @@ if usingJL:
     reframed = series_to_supervised(trainingScaled, n_steps, 1)
     print(reframed.shape)
     values = reframed.values
-    # total length: 965500
     train = values
 
     # load and build testing dataset
@@ -97,14 +98,13 @@ else:
     print(reframed.shape)
     # split into train and test sets
     values = reframed.values
-    n_train_steps = 868950  # 90% of dataset, total length: 965500
+    n_train_steps = 1650780  # 90% of dataset, total length: 1834200
     train = values[:n_train_steps, :]
     test = values[n_train_steps:, :]
 
 # transforming targets
 if transformTarget:
-    trainingyScaled = scaler.fit_transform(
-        np.array(targetOfTrainingDataset).reshape(-1, 1))
+    trainingyScaled = scaler.fit_transform(np.array(targetOfTrainingDataset).reshape(-1, 1))
 
     # seems no need to scale the test y, as it is only used for comparison
     # testingyScaled = scaler.fit_transform(np.array(targetOfTestingDatasest).reshape(-1, 1))
@@ -138,7 +138,7 @@ def create_model():
         layers.LSTM(49, input_shape=(train_X.shape[1], train_X.shape[2])),
         layers.Dense(1),
     ])
-    model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.003), loss='mse')
+    model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.003), loss='mse', metrics=['accuracy'])
 
     return model
 
@@ -152,13 +152,14 @@ kfolds = cross_val_score(model, train_X, train_y, cv=7, scoring='r2')
 print('The mean accuracy:', kfolds.mean())
 
 # use callbacks
-
 checkpoint = ModelCheckpoint("", monitor="val_loss", verbose=1, save_best_only=True)
 reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.3, patience=5, min_lr=1e-6, verbose=1)
 early_stop = EarlyStopping(monitor='val_loss', min_delta=0, patience=5, mode='auto', restore_best_weights=True)
 
 # fit network [3, 3, 5, 5, 3433]
 history = model.fit(train_X, train_y, epochs=50, batch_size=75, validation_split=0.2, verbose=2, shuffle=False, callbacks=[early_stop, checkpoint, reduce_lr])
+
+print(history.history.keys())
 
 # plot history
 # loss
@@ -168,7 +169,7 @@ fig.suptitle('Loss Comparison', fontsize=16)
 plt.plot(history.history['loss'], label='train')
 plt.plot(history.history['val_loss'], label='validation')
 plt.legend(loc='upper right')
-plt.savefig('trainLossVsVal.png', format='png')
+plt.savefig('outputFile/ModelPlots/'+tTag+'trainLossVsVal.png', format='png')
 plt.close(fig)
 
 plt.ioff()
@@ -177,11 +178,11 @@ fig.suptitle('Accuracy Comparison', fontsize=16)
 plt.plot(history.history['accuracy'], label='train')
 plt.plot(history.history['val_accuracy'], label='validation')
 plt.legend(loc='upper left')
-plt.savefig('trainAccuracyVsVal.png', format='png')
+plt.savefig('outputFile/ModelPlots/'+tTag+'trainAccuracyVsVal.png', format='png')
 plt.close(fig)
 
 # save the model
-model.model.save('outputFile/Models/'+timeTag()+'EsModel')
+model.model.save('outputFile/Models/'+tTag+'EsModel')
 # https://stackoverflow.com/questions/42666046/loading-a-trained-keras-model-and-continue-training
 
 # make a prediction
@@ -207,9 +208,9 @@ fig.suptitle('Actual vs Prediction', fontsize=16)
 pred_test_list = [i for i in yPredict]
 submission = pd.DataFrame({'Arousal': yActual, 'Prediction': pred_test_list})
 submission.loc[1:, ['Arousal', 'Prediction']].plot()
-plt.savefig('actualVsPrediction.png', format='png')
+plt.savefig('outputFile/ModelPlots/'+tTag+'actualVsPrediction.png', format='png')
 plt.close(fig)
-submission.to_csv('outputFile/Submissions/es2jSubmission.csv', index=False)
+submission.to_csv('outputFile/Submissions/'+tTag+'es2jSubmission.csv', index=False)
 
 # print(pred_test_list[1000:1150])
 
@@ -221,5 +222,5 @@ plt.ioff()
 fig = plt.figure(figsize=[48, 48])
 fig.suptitle('Actual Prediction Correlation', fontsize=16)
 sns.pairplot(d0, kind="scatter")
-plt.savefig('actualPredictionCorrelation.png', format='png')
+plt.savefig('outputFile/ModelPlots/'+tTag+'actualPredictionCorrelation.png', format='png')
 plt.close(fig)
