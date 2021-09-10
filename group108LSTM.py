@@ -50,21 +50,21 @@ usingJL = False
 transformTarget = True
 
 # read datasets, first n_steps data will be skipped
+# Possible columns: Time,Valence,Arousal,RMS,F0,MFCC1,MFCC2,MFCC3,MFCC4,MFCC5,FileName,voiceTag
 if usingJL:
     trainingDataset = pd.read_csv('inputFile/modelInput/allFileCombineP.csv')
     targetOfTrainingDataset = trainingDataset['Arousal'][n_steps:]
-    trainingDataset = trainingDataset.drop(columns=['Time', 'Arousal', 'Valence'])
+    trainingDataset = trainingDataset[['RMS', 'F0', 'MFCC1', 'MFCC2', 'MFCC3', 'MFCC4', 'MFCC5']]
     print(trainingDataset.head(5))
 
     testingDataset = pd.read_csv('inputFile/modelInput/jlco0000st.csv')
     targetOfTestingDatasest = testingDataset['Arousal'][n_steps:]
-    testingDataset = testingDataset.drop(
-        columns=['Time', 'Arousal', 'Valence', 'FileName'])
+    testingDataset = testingDataset[['RMS', 'F0', 'MFCC1', 'MFCC2', 'MFCC3', 'MFCC4', 'MFCC5']]
     print(trainingDataset.head(5))
 else:
     trainingDataset = pd.read_csv('inputFile/modelInput/allFileCombineP.csv')
     targetOfTrainingDataset = trainingDataset['Arousal'][n_steps:]
-    trainingDataset = trainingDataset.drop(columns=['Time', 'Arousal', 'Valence'])
+    trainingDataset = trainingDataset[['RMS', 'F0', 'MFCC1', 'MFCC2', 'MFCC3', 'MFCC4', 'MFCC5']]
     print(trainingDataset.head(5))
 
 if usingJL:
