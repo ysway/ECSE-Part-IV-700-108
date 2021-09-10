@@ -1,5 +1,5 @@
 cd test\RECOLA
-start python modelInputGen.py
+start python modelInputGen20ms.py
 cd ..\Semaine
 python allFeatureExtraction.py && python modelInputGen.py
 cd ..

@@ -17,7 +17,7 @@ def main():
         else:
             pass
         try:
-            filenames.remove('jlco0000st')
+            filenames.remove('jlco0000st.csv')
         except:
             pass
         try:
