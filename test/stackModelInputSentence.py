@@ -32,12 +32,15 @@ def main():
 
             # Padded
             diff = getPadSize() - currentDF.shape[0] % getPadSize()
-            if diff == 5:
+            if diff == getPadSize():
                 resultPadDF = resultPadDF.append(currentDF, ignore_index=True)
             else:
-                currentDF = currentDF.reindex(range(currentDF.shape[0] + diff), fill_value=0)
+                padDf = currentDF[0:0].reindex(range(diff), fill_value=0)
+                # front pad zeros
+                resultPadDF = resultPadDF.append(padDf, ignore_index=True)
                 resultPadDF = resultPadDF.append(currentDF, ignore_index=True)
-            del diff, currentDF
+
+            del diff, currentDF, padDf
 
     resultUnpadDF.to_csv(IOPath+'allFileCombineSentenceU.csv', index=False)
     resultPadDF.to_csv(IOPath+'allFileCombineSentenceP.csv', index=False)
