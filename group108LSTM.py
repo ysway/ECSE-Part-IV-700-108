@@ -164,7 +164,7 @@ print(history.history.keys())
 # plot history
 # loss
 plt.ioff()
-fig = plt.figure(figsize=[48, 48])
+fig = plt.figure(figsize=[24, 24])
 fig.suptitle('Loss Comparison', fontsize=16)
 plt.plot(history.history['loss'], label='train')
 plt.plot(history.history['val_loss'], label='validation')
@@ -173,7 +173,7 @@ plt.savefig('outputFile/ModelPlots/'+tTag+'trainLossVsVal.png', format='png')
 plt.close(fig)
 
 plt.ioff()
-fig = plt.figure(figsize=[48, 48])
+fig = plt.figure(figsize=[24, 24])
 fig.suptitle('Accuracy Comparison', fontsize=16)
 plt.plot(history.history['accuracy'], label='train')
 plt.plot(history.history['val_accuracy'], label='validation')
@@ -203,12 +203,13 @@ print('Test RMSE: %.3f' % rmse)
 r2_score(yActual, yPredict)
 
 plt.ioff()
-fig = plt.figure(figsize=[48, 48])
+fig = plt.figure(figsize=[24, 24])
 fig.suptitle('Actual vs Prediction', fontsize=16)
 pred_test_list = [i for i in yPredict]
 submission = pd.DataFrame({'Arousal': yActual, 'Prediction': pred_test_list})
 submission.loc[1:, ['Arousal', 'Prediction']].plot()
 plt.savefig('outputFile/ModelPlots/'+tTag+'actualVsPrediction.png', format='png')
+plt.savefig('outputFile/ModelPlots/'+tTag+'actualVsPrediction.svg', format='svg')
 plt.close(fig)
 submission.to_csv('outputFile/Submissions/'+tTag+'es2jSubmission.csv', index=False)
 
@@ -219,8 +220,9 @@ print(correlation)
 
 d0 = submission[['Arousal', 'Prediction']]
 plt.ioff()
-fig = plt.figure(figsize=[48, 48])
+fig = plt.figure(figsize=[24, 24])
 fig.suptitle('Actual Prediction Correlation', fontsize=16)
 sns.pairplot(d0, kind="scatter")
 plt.savefig('outputFile/ModelPlots/'+tTag+'actualPredictionCorrelation.png', format='png')
+plt.savefig('outputFile/ModelPlots/'+tTag+'actualPredictionCorrelation.svg', format='svg')
 plt.close(fig)
