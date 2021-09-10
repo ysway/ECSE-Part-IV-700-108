@@ -3,7 +3,7 @@ import pandas as pd
 
 # make it const
 def getPadSize():
-    PAD_SIZE = 50
+    PAD_SIZE = 25
     return PAD_SIZE
 
 def main():

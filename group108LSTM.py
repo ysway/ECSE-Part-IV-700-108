@@ -40,7 +40,6 @@ def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
         agg.dropna(inplace=True)
     return agg
 
-
 # Define scaler, feature number and number of step looking back
 scale_range = (0, 1)
 scaler = MinMaxScaler(feature_range=scale_range)
@@ -52,11 +51,9 @@ transformTarget = True
 
 # read datasets, first n_steps data will be skipped
 if usingJL:
-    trainingDataset = pd.read_csv(
-        'inputFile/modelInput/sentences/allFileCombineSentenceP.csv')
+    trainingDataset = pd.read_csv('inputFile/modelInput/allFileCombineP.csv')
     targetOfTrainingDataset = trainingDataset['Arousal'][n_steps:]
-    trainingDataset = trainingDataset.drop(
-        columns=['Time', 'Arousal', 'Valence'])
+    trainingDataset = trainingDataset.drop(columns=['Time', 'Arousal', 'Valence'])
     print(trainingDataset.head(5))
 
     testingDataset = pd.read_csv('inputFile/modelInput/jlco0000st.csv')
@@ -65,11 +62,9 @@ if usingJL:
         columns=['Time', 'Arousal', 'Valence', 'FileName'])
     print(trainingDataset.head(5))
 else:
-    trainingDataset = pd.read_csv(
-        'inputFile/modelInput/sentences/allFileCombineSentenceP.csv')
+    trainingDataset = pd.read_csv('inputFile/modelInput/allFileCombineP.csv')
     targetOfTrainingDataset = trainingDataset['Arousal'][n_steps:]
-    trainingDataset = trainingDataset.drop(
-        columns=['Time', 'Arousal', 'Valence'])
+    trainingDataset = trainingDataset.drop(columns=['Time', 'Arousal', 'Valence'])
     print(trainingDataset.head(5))
 
 if usingJL:
@@ -92,7 +87,6 @@ if usingJL:
     reframed = series_to_supervised(testingScaled, n_steps, 1)
     print(reframed.shape)
     values = reframed.values
-    # total length: 6708
     test = values
 else:
     values = trainingDataset.values
@@ -139,21 +133,17 @@ train_X = train_X.reshape((train_X.shape[0], n_steps + 1, n_features))
 test_X = test_X.reshape((test_X.shape[0], n_steps + 1, n_features))
 print(train_X.shape, train_y.shape, test_X.shape, test_y.shape)
 
-
 def create_model():
     model = keras.Sequential([
         layers.LSTM(49, input_shape=(train_X.shape[1], train_X.shape[2])),
         layers.Dense(1),
     ])
-    model.compile(optimizer=keras.optimizers.Adam(
-        learning_rate=0.003), loss='mse')
+    model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.003), loss='mse')
 
     return model
 
-
 # Create a KerasClassifier with best parameters
-model = KerasRegressor(build_fn=create_model,
-                       batch_size=225, epochs=35, shuffle=False)
+model = KerasRegressor(build_fn=create_model, batch_size=225, epochs=35, shuffle=False)
 
 # Calculate the accuracy score for each fold
 kfolds = cross_val_score(model, train_X, train_y, cv=7, scoring='r2')
@@ -163,24 +153,31 @@ print('The mean accuracy:', kfolds.mean())
 
 # use callbacks
 
-checkpoint = ModelCheckpoint(
-    "", monitor="val_loss", verbose=1, save_best_only=True)
-reduce_lr = ReduceLROnPlateau(
-    monitor='val_loss', factor=0.3, patience=5, min_lr=1e-6, verbose=1)
-early_stop = EarlyStopping(monitor='val_loss', min_delta=0,
-                           patience=5, mode='auto', restore_best_weights=True)
+checkpoint = ModelCheckpoint("", monitor="val_loss", verbose=1, save_best_only=True)
+reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.3, patience=5, min_lr=1e-6, verbose=1)
+early_stop = EarlyStopping(monitor='val_loss', min_delta=0, patience=5, mode='auto', restore_best_weights=True)
 
 # fit network [3, 3, 5, 5, 3433]
-history = model.fit(train_X, train_y, epochs=50, batch_size=75, validation_split=0.2,
-                    verbose=2, shuffle=False, callbacks=[early_stop, checkpoint, reduce_lr])
+history = model.fit(train_X, train_y, epochs=50, batch_size=75, validation_split=0.2, verbose=2, shuffle=False, callbacks=[early_stop, checkpoint, reduce_lr])
 
 # plot history
+# loss
 plt.ioff()
 fig = plt.figure(figsize=[48, 48])
+fig.suptitle('Loss Comparison', fontsize=16)
 plt.plot(history.history['loss'], label='train')
 plt.plot(history.history['val_loss'], label='validation')
-plt.legend()
-plt.savefig('trainVsVal.png', format=png)
+plt.legend(loc='upper right')
+plt.savefig('trainLossVsVal.png', format='png')
+plt.close(fig)
+
+plt.ioff()
+fig = plt.figure(figsize=[48, 48])
+fig.suptitle('Accuracy Comparison', fontsize=16)
+plt.plot(history.history['accuracy'], label='train')
+plt.plot(history.history['val_accuracy'], label='validation')
+plt.legend(loc='upper left')
+plt.savefig('trainAccuracyVsVal.png', format='png')
 plt.close(fig)
 
 # save the model
@@ -206,10 +203,11 @@ r2_score(yActual, yPredict)
 
 plt.ioff()
 fig = plt.figure(figsize=[48, 48])
+fig.suptitle('Actual vs Prediction', fontsize=16)
 pred_test_list = [i for i in yPredict]
 submission = pd.DataFrame({'Arousal': yActual, 'Prediction': pred_test_list})
 submission.loc[1:, ['Arousal', 'Prediction']].plot()
-plt.savefig('ActualVsPrediction.png', format=png)
+plt.savefig('actualVsPrediction.png', format='png')
 plt.close(fig)
 submission.to_csv('outputFile/Submissions/es2jSubmission.csv', index=False)
 
@@ -221,6 +219,7 @@ print(correlation)
 d0 = submission[['Arousal', 'Prediction']]
 plt.ioff()
 fig = plt.figure(figsize=[48, 48])
+fig.suptitle('Actual Prediction Correlation', fontsize=16)
 sns.pairplot(d0, kind="scatter")
-plt.savefig('ActualVsPredictionCorrelation.png', format=png)
+plt.savefig('actualPredictionCorrelation.png', format='png')
 plt.close(fig)
