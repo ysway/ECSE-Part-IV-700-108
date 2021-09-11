@@ -49,7 +49,7 @@ n_steps = 24  # exclude the current step
 n_features = 7
 
 usingJL = False
-transformTarget = True
+transformTarget = False
 
 # read datasets, first n_steps data will be skipped
 # Possible columns: Time,Valence,Arousal,RMS,F0,MFCC1,MFCC2,MFCC3,MFCC4,MFCC5,FileName,voiceTag
@@ -135,10 +135,11 @@ print(train_X.shape, train_y.shape, test_X.shape, test_y.shape)
 
 def create_model():
     model = keras.Sequential([
-        layers.LSTM(49, input_shape=(train_X.shape[1], train_X.shape[2])),
+        layers.LSTM(56, input_shape=(train_X.shape[1], train_X.shape[2]), return_sequences=True),
+        layers.LSTM(21),
         layers.Dense(1),
     ])
-    model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.003), loss='mse', metrics=['accuracy'])
+    model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.005), loss='mse')
 
     return model
 
@@ -153,37 +154,28 @@ print('The mean accuracy:', kfolds.mean())
 
 # use callbacks
 checkpoint = ModelCheckpoint("", monitor="val_loss", verbose=1, save_best_only=True)
-reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.3, patience=5, min_lr=1e-6, verbose=1)
+reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.3, patience=7, min_lr=1e-6, verbose=1)
 early_stop = EarlyStopping(monitor='val_loss', min_delta=0, patience=5, mode='auto', restore_best_weights=True)
 
 # fit network [3, 3, 5, 5, 3433]
-history = model.fit(train_X, train_y, epochs=50, batch_size=75, validation_split=0.2, verbose=2, shuffle=False, callbacks=[early_stop, checkpoint, reduce_lr])
+history = model.fit(train_X, train_y, epochs=50, batch_size=75, validation_split=0.3, verbose=2, shuffle=False, callbacks=[early_stop, checkpoint, reduce_lr])
 
 print(history.history.keys())
-
-# plot history
-# loss
-plt.ioff()
-fig = plt.figure(figsize=[24, 24])
-fig.suptitle('Loss Comparison', fontsize=16)
-plt.plot(history.history['loss'], label='train')
-plt.plot(history.history['val_loss'], label='validation')
-plt.legend(loc='upper right')
-plt.savefig('outputFile/ModelPlots/'+tTag+'trainLossVsVal.png', format='png')
-plt.close(fig)
-
-plt.ioff()
-fig = plt.figure(figsize=[24, 24])
-fig.suptitle('Accuracy Comparison', fontsize=16)
-plt.plot(history.history['accuracy'], label='train')
-plt.plot(history.history['val_accuracy'], label='validation')
-plt.legend(loc='upper left')
-plt.savefig('outputFile/ModelPlots/'+tTag+'trainAccuracyVsVal.png', format='png')
-plt.close(fig)
 
 # save the model
 model.model.save('outputFile/Models/'+tTag+'EsModel')
 # https://stackoverflow.com/questions/42666046/loading-a-trained-keras-model-and-continue-training
+
+# plot history
+# loss
+plt.ioff()
+fig = plt.figure(figsize=[12, 12])
+fig.suptitle('Loss Comparison', fontsize=16)
+plt.plot(history.history['loss'], label='train')
+plt.plot(history.history['val_loss'], label='validation')
+plt.legend(loc='upper right')
+plt.savefig('outputFile/Models/'+tTag+'EsModel/'+'trainLossVsVal.png', format='png')
+plt.close(fig)
 
 # make a prediction
 if transformTarget:
@@ -208,10 +200,10 @@ fig.suptitle('Actual vs Prediction', fontsize=16)
 pred_test_list = [i for i in yPredict]
 submission = pd.DataFrame({'Arousal': yActual, 'Prediction': pred_test_list})
 submission.loc[1:, ['Arousal', 'Prediction']].plot()
-plt.savefig('outputFile/ModelPlots/'+tTag+'actualVsPrediction.png', format='png')
-plt.savefig('outputFile/ModelPlots/'+tTag+'actualVsPrediction.svg', format='svg')
+plt.savefig('outputFile/Models/'+tTag+'EsModel/'+'actualVsPrediction.png', format='png')
+plt.savefig('outputFile/Models/'+tTag+'EsModel/'+'actualVsPrediction.svg', format='svg')
 plt.close(fig)
-submission.to_csv('outputFile/Submissions/'+tTag+'es2jSubmission.csv', index=False)
+submission.to_csv('outputFile/Models/'+tTag+'EsModel/'+'es2jSubmission.csv', index=False)
 
 # print(pred_test_list[1000:1150])
 
@@ -223,6 +215,6 @@ plt.ioff()
 fig = plt.figure(figsize=[24, 24])
 fig.suptitle('Actual Prediction Correlation', fontsize=16)
 sns.pairplot(d0, kind="scatter")
-plt.savefig('outputFile/ModelPlots/'+tTag+'actualPredictionCorrelation.png', format='png')
-plt.savefig('outputFile/ModelPlots/'+tTag+'actualPredictionCorrelation.svg', format='svg')
+plt.savefig('outputFile/Models/'+tTag+'EsModel/'+'actualPredictionCorrelation.png', format='png')
+plt.savefig('outputFile/Models/'+tTag+'EsModel/'+'actualPredictionCorrelation.svg', format='svg')
 plt.close(fig)

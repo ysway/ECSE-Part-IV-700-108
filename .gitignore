@@ -1,10 +1,18 @@
-#Custom Ignore
+# Custom Ignore
 inputFile/
 outputFile/
 
-#VS code
+# VS code
 vs/
 vscode/
+
+# Training cache
+keras_metadata.pb
+saved_model.pb
+variables/
+test/keras_metadata.pb
+test/saved_model.pb
+test/variables/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
