@@ -133,18 +133,30 @@ train_X = train_X.reshape((train_X.shape[0], n_steps + 1, n_features))
 test_X = test_X.reshape((test_X.shape[0], n_steps + 1, n_features))
 print(train_X.shape, train_y.shape, test_X.shape, test_y.shape)
 
+customAdam = keras.optimizers.Adam(
+    learning_rate=0.001,
+    beta_1=0.9,
+    beta_2=0.999,
+    epsilon=1e-06,
+    amsgrad=False,
+    name='Adam',
+)
+
 def create_model():
     model = keras.Sequential([
-        layers.LSTM(56, input_shape=(train_X.shape[1], train_X.shape[2]), return_sequences=True),
-        layers.LSTM(21),
+        layers.LSTM(56, input_shape=(train_X.shape[1], train_X.shape[2]), return_sequences=True, recurrent_activation='relu'),
+        layers.LSTM(21, recurrent_dropout=0.2,recurrent_activation='relu'),
         layers.Dense(1),
     ])
-    model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.005), loss='mse')
-
+    model.compile(optimizer=customAdam, loss='mse')
     return model
 
+batch_size = 75
+epochs = 70
+validation_split = 0.3
+
 # Create a KerasClassifier with best parameters
-model = KerasRegressor(build_fn=create_model, batch_size=225, epochs=35, shuffle=False)
+model = KerasRegressor(build_fn=create_model, batch_size=batch_size, epochs=epochs, shuffle=False)
 
 # Calculate the accuracy score for each fold
 kfolds = cross_val_score(model, train_X, train_y, cv=7, scoring='r2')
@@ -153,17 +165,17 @@ kfolds = cross_val_score(model, train_X, train_y, cv=7, scoring='r2')
 print('The mean accuracy:', kfolds.mean())
 
 # use callbacks
-checkpoint = ModelCheckpoint("", monitor="val_loss", verbose=1, save_best_only=True)
+checkpoint = ModelCheckpoint(filepath='outputFile/checkPoints/', monitor="val_loss", verbose=1, save_weights_only=True, save_best_only=True)
 reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.3, patience=7, min_lr=1e-6, verbose=1)
 early_stop = EarlyStopping(monitor='val_loss', min_delta=0, patience=5, mode='auto', restore_best_weights=True)
 
 # fit network [3, 3, 5, 5, 3433]
-history = model.fit(train_X, train_y, epochs=50, batch_size=75, validation_split=0.3, verbose=2, shuffle=False, callbacks=[early_stop, checkpoint, reduce_lr])
+history = model.fit(train_X, train_y, epochs=epochs, batch_size=batch_size, validation_split=validation_split, verbose=2, shuffle=False, callbacks=[early_stop, checkpoint, reduce_lr])
 
 print(history.history.keys())
 
 # save the model
-model.model.save('outputFile/Models/'+tTag+'EsModel')
+model.model.save('outputFile/models/'+tTag+'EsModel')
 # https://stackoverflow.com/questions/42666046/loading-a-trained-keras-model-and-continue-training
 
 # plot history
@@ -174,7 +186,7 @@ fig.suptitle('Loss Comparison', fontsize=16)
 plt.plot(history.history['loss'], label='train')
 plt.plot(history.history['val_loss'], label='validation')
 plt.legend(loc='upper right')
-plt.savefig('outputFile/Models/'+tTag+'EsModel/'+'trainLossVsVal.png', format='png')
+plt.savefig('outputFile/models/'+tTag+'EsModel/'+'trainLossVsVal.png', format='png')
 plt.close(fig)
 
 # make a prediction
@@ -182,9 +194,9 @@ if transformTarget:
     inv_yPredict = model.predict(test_X)
     # inv transform the predicted value
     yPredict = scaler.inverse_transform(inv_yPredict.reshape(-1, 1))
+    yPredict = yPredict[:, 0]
 else:
     yPredict = model.predict(test_X)
-yPredict = yPredict[:, 0]
 
 # actual value
 yActual = test_y
@@ -200,10 +212,10 @@ fig.suptitle('Actual vs Prediction', fontsize=16)
 pred_test_list = [i for i in yPredict]
 submission = pd.DataFrame({'Arousal': yActual, 'Prediction': pred_test_list})
 submission.loc[1:, ['Arousal', 'Prediction']].plot()
-plt.savefig('outputFile/Models/'+tTag+'EsModel/'+'actualVsPrediction.png', format='png')
-plt.savefig('outputFile/Models/'+tTag+'EsModel/'+'actualVsPrediction.svg', format='svg')
+plt.savefig('outputFile/models/'+tTag+'EsModel/'+'actualVsPrediction.png', format='png')
+plt.savefig('outputFile/models/'+tTag+'EsModel/'+'actualVsPrediction.svg', format='svg')
 plt.close(fig)
-submission.to_csv('outputFile/Models/'+tTag+'EsModel/'+'es2jSubmission.csv', index=False)
+submission.to_csv('outputFile/models/'+tTag+'EsModel/'+'es2jSubmission.csv', index=False)
 
 # print(pred_test_list[1000:1150])
 
@@ -215,6 +227,6 @@ plt.ioff()
 fig = plt.figure(figsize=[24, 24])
 fig.suptitle('Actual Prediction Correlation', fontsize=16)
 sns.pairplot(d0, kind="scatter")
-plt.savefig('outputFile/Models/'+tTag+'EsModel/'+'actualPredictionCorrelation.png', format='png')
-plt.savefig('outputFile/Models/'+tTag+'EsModel/'+'actualPredictionCorrelation.svg', format='svg')
+plt.savefig('outputFile/models/'+tTag+'EsModel/'+'actualPredictionCorrelation.png', format='png')
+plt.savefig('outputFile/models/'+tTag+'EsModel/'+'actualPredictionCorrelation.svg', format='svg')
 plt.close(fig)
