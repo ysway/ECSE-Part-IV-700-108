@@ -159,7 +159,7 @@ validation_split = 0.3
 model = KerasRegressor(build_fn=create_model, batch_size=batch_size, epochs=epochs, shuffle=False)
 
 # Calculate the accuracy score for each fold
-kfolds = cross_val_score(model, train_X, train_y, cv=7, scoring='r2')
+kfolds = cross_val_score(model, train_X, train_y, cv=10, scoring='r2')
 
 # Get the accuracy
 print('The mean accuracy:', kfolds.mean())
@@ -167,7 +167,7 @@ print('The mean accuracy:', kfolds.mean())
 # use callbacks
 checkpoint = ModelCheckpoint(filepath='outputFile/checkPoints/', monitor="val_loss", verbose=1, save_weights_only=True, save_best_only=True)
 reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.3, patience=7, min_lr=1e-6, verbose=1)
-early_stop = EarlyStopping(monitor='val_loss', min_delta=0, patience=5, mode='auto', restore_best_weights=True)
+early_stop = EarlyStopping(monitor='val_loss', min_delta=0, patience=14, mode='auto', restore_best_weights=True)
 
 # fit network [3, 3, 5, 5, 3433]
 history = model.fit(train_X, train_y, epochs=epochs, batch_size=batch_size, validation_split=validation_split, verbose=2, shuffle=False, callbacks=[early_stop, checkpoint, reduce_lr])
