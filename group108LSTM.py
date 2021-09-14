@@ -49,7 +49,7 @@ n_steps = 24  # exclude the current step
 n_features = 7
 
 usingJL = False
-transformTarget = False
+transformTarget = True
 
 # read datasets, first n_steps data will be skipped
 # Possible columns: Time,Valence,Arousal,RMS,F0,MFCC1,MFCC2,MFCC3,MFCC4,MFCC5,FileName,voiceTag
@@ -111,16 +111,14 @@ if transformTarget:
 
 # split into input and outputs
 if usingJL:
-    # n_obs = (n_steps + 1) * n_features
-    # train_X, train_y = train[:, :n_obs], targetOfTrainingDataset
-    # test_X, test_y = test[:, :n_obs], targetOfTestingDatasest
-    train_X = train
-    train_y = trainingyScaled[:, 0]
+    if transformTarget:
+        train_X, train_y = train, trainingyScaled[:, 0]
+    else:
+        train_X, train_y = train, targetOfTrainingDataset
 
     test_X = test
     test_y = targetOfTestingDatasest
 else:
-    n_obs = n_steps * n_features
     if transformTarget:
         train_X, train_y = train, trainingyScaled[:n_train_steps, 0]
     else:
@@ -144,8 +142,9 @@ customAdam = keras.optimizers.Adam(
 
 def create_model():
     model = keras.Sequential([
-        layers.LSTM(56, input_shape=(train_X.shape[1], train_X.shape[2]), return_sequences=True, recurrent_activation='relu'),
-        layers.LSTM(21, recurrent_dropout=0.2,recurrent_activation='relu'),
+        layers.LSTM(56, input_shape=(train_X.shape[1], train_X.shape[2]), recurrent_dropout=0.2, recurrent_activation='relu'),
+        # layers.LSTM(56, input_shape=(train_X.shape[1], train_X.shape[2]), return_sequences=True, recurrent_activation='relu'),
+        # layers.LSTM(21, recurrent_dropout=0.2,recurrent_activation='relu'),
         layers.Dense(1),
     ])
     model.compile(optimizer=customAdam, loss='mse')
