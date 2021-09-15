@@ -2,8 +2,8 @@ from keras.wrappers.scikit_learn import KerasRegressor
 from sklearn.metrics import r2_score
 from keras.callbacks import Callback, ReduceLROnPlateau, EarlyStopping, ModelCheckpoint
 from sklearn.model_selection import cross_val_score
-import numpy as np  # linear algebra
-import pandas as pd  # data processing, CSV file I/O (e.g. pd.read_csv)
+import numpy as np
+import pandas as pd
 import seaborn as sns
 from tensorflow import keras
 from tensorflow.keras import layers
@@ -131,6 +131,10 @@ train_X = train_X.reshape((train_X.shape[0], n_steps + 1, n_features))
 test_X = test_X.reshape((test_X.shape[0], n_steps + 1, n_features))
 print(train_X.shape, train_y.shape, test_X.shape, test_y.shape)
 
+batch_size = 75
+epochs = 70
+validation_split = 0.3
+
 customAdam = keras.optimizers.Adam(
     learning_rate=0.001,
     beta_1=0.9,
@@ -142,17 +146,14 @@ customAdam = keras.optimizers.Adam(
 
 def create_model():
     model = keras.Sequential([
-        layers.LSTM(56, input_shape=(train_X.shape[1], train_X.shape[2]), recurrent_dropout=0.2, recurrent_activation='relu'),
+	    # no dropout and activation in LSTM if using cuDNN kernel
+        layers.LSTM(56, input_shape=(train_X.shape[1], train_X.shape[2])),
         # layers.LSTM(56, input_shape=(train_X.shape[1], train_X.shape[2]), return_sequences=True, recurrent_activation='relu'),
         # layers.LSTM(21, recurrent_dropout=0.2,recurrent_activation='relu'),
         layers.Dense(1),
     ])
     model.compile(optimizer=customAdam, loss='mse')
     return model
-
-batch_size = 75
-epochs = 70
-validation_split = 0.3
 
 # Create a KerasClassifier with best parameters
 model = KerasRegressor(build_fn=create_model, batch_size=batch_size, epochs=epochs, shuffle=False)
@@ -171,11 +172,11 @@ early_stop = EarlyStopping(monitor='val_loss', min_delta=0, patience=14, mode='a
 # fit network [3, 3, 5, 5, 3433]
 history = model.fit(train_X, train_y, epochs=epochs, batch_size=batch_size, validation_split=validation_split, verbose=2, shuffle=False, callbacks=[early_stop, checkpoint, reduce_lr])
 
-print(history.history.keys())
-
 # save the model
 model.model.save('outputFile/models/'+tTag+'EsModel')
 # https://stackoverflow.com/questions/42666046/loading-a-trained-keras-model-and-continue-training
+
+print(history.history.keys())
 
 # plot history
 # loss
