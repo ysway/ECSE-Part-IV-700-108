@@ -131,9 +131,13 @@ train_X = train_X.reshape((train_X.shape[0], n_steps + 1, n_features))
 test_X = test_X.reshape((test_X.shape[0], n_steps + 1, n_features))
 print(train_X.shape, train_y.shape, test_X.shape, test_y.shape)
 
+# Parameters
 batch_size = 75
 epochs = 70
 validation_split = 0.3
+# https://machinelearningmastery.com/check-point-deep-learning-models-keras/
+usingCheckPoint = False
+continueTraining = False
 
 customAdam = keras.optimizers.Adam(
     learning_rate=0.001,
@@ -155,22 +159,35 @@ def create_model():
     model.compile(optimizer=customAdam, loss='mse')
     return model
 
-# Create a KerasClassifier with best parameters
-model = KerasRegressor(build_fn=create_model, batch_size=batch_size, epochs=epochs, shuffle=False)
+if not usingCheckPoint:
+    # Create a KerasClassifier with best parameters
+    model = KerasRegressor(build_fn=create_model, batch_size=batch_size, epochs=epochs, shuffle=False)
 
-# Calculate the accuracy score for each fold
-kfolds = cross_val_score(model, train_X, train_y, cv=10, scoring='r2')
+    # Calculate the accuracy score for each fold
+    kfolds = cross_val_score(model, train_X, train_y, cv=5, scoring='r2')
 
-# Get the accuracy
-print('The mean accuracy:', kfolds.mean())
+    # Get the accuracy
+    print('The mean accuracy:', kfolds.mean())
 
 # use callbacks
-checkpoint = ModelCheckpoint(filepath='outputFile/checkPoints/', monitor="val_loss", verbose=1, save_weights_only=True, save_best_only=True)
+checkpoint = ModelCheckpoint(filepath='outputFile/checkPoint/bestWeight.hdf5', monitor="val_loss", verbose=1, save_best_only=True, mode='max')
 reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.3, patience=7, min_lr=1e-6, verbose=1)
 early_stop = EarlyStopping(monitor='val_loss', min_delta=0, patience=14, mode='auto', restore_best_weights=True)
 
-# fit network [3, 3, 5, 5, 3433]
-history = model.fit(train_X, train_y, epochs=epochs, batch_size=batch_size, validation_split=validation_split, verbose=2, shuffle=False, callbacks=[early_stop, checkpoint, reduce_lr])
+if usingCheckPoint:
+    # Create model
+    model = create_model()
+    # Load weights
+    model.load_weights('outputFile/checkPoint/bestWeight.hdf5')
+    # Compile model (required to make predictions)
+    model.compile(optimizer=customAdam, loss='mse')
+    print("Created model and loaded weights from file")
+    if continueTraining:
+        newEpochs = 10
+        history = model.fit(train_X, train_y, epochs=newEpochs, batch_size=batch_size, validation_split=validation_split, verbose=2, shuffle=False, callbacks=[early_stop, checkpoint, reduce_lr])
+else:
+    # Fit network [3, 3, 5, 5, 3433]
+    history = model.fit(train_X, train_y, epochs=epochs, batch_size=batch_size, validation_split=validation_split, verbose=2, shuffle=False, callbacks=[early_stop, checkpoint, reduce_lr])
 
 # save the model
 model.model.save('outputFile/models/'+tTag+'EsModel')
@@ -178,8 +195,7 @@ model.model.save('outputFile/models/'+tTag+'EsModel')
 
 print(history.history.keys())
 
-# plot history
-# loss
+# plot loss history
 plt.ioff()
 fig = plt.figure(figsize=[12, 12])
 fig.suptitle('Loss Comparison', fontsize=16)
