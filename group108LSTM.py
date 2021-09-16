@@ -170,7 +170,7 @@ if not usingCheckPoint:
     print('The mean accuracy:', kfolds.mean())
 
 # use callbacks
-checkpoint = ModelCheckpoint(filepath='outputFile/checkPoint/bestWeight.hdf5', monitor="val_loss", verbose=1, save_best_only=True, mode='max')
+checkpoint = ModelCheckpoint(filepath='outputFile/models/bestWeight\.hdf5', monitor="val_loss", verbose=1, save_best_only=True, mode='max')
 reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.3, patience=7, min_lr=1e-6, verbose=1)
 early_stop = EarlyStopping(monitor='val_loss', min_delta=0, patience=14, mode='auto', restore_best_weights=True)
 
@@ -178,7 +178,7 @@ if usingCheckPoint:
     # Create model
     model = create_model()
     # Load weights
-    model.load_weights('outputFile/checkPoint/bestWeight.hdf5')
+    model.load_weights('outputFile/models/bestWeight\.hdf5')
     # Compile model (required to make predictions)
     model.compile(optimizer=customAdam, loss='mse')
     print("Created model and loaded weights from file")
