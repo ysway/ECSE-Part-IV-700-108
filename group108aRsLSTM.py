@@ -1,6 +1,6 @@
 from keras.wrappers.scikit_learn import KerasRegressor
 from sklearn.metrics import r2_score
-from keras.callbacks import Callback, ReduceLROnPlateau, EarlyStopping, ModelCheckpoint
+from keras.callbacks import ReduceLROnPlateau, EarlyStopping, ModelCheckpoint
 from sklearn.model_selection import cross_val_score
 import numpy as np
 import pandas as pd
@@ -150,7 +150,7 @@ customAdam = keras.optimizers.Adam(
 
 def create_model():
     model = keras.Sequential([
-	    # no dropout and activation in LSTM if using cuDNN kernel
+        # no dropout and activation in LSTM if using cuDNN kernel
         layers.LSTM(56, input_shape=(train_X.shape[1], train_X.shape[2])),
         # layers.LSTM(56, input_shape=(train_X.shape[1], train_X.shape[2]), return_sequences=True, recurrent_activation='relu'),
         # layers.LSTM(21, recurrent_dropout=0.2,recurrent_activation='relu'),
@@ -170,7 +170,7 @@ if not usingCheckPoint:
     print('The mean accuracy:', kfolds.mean())
 
 # use callbacks
-checkpoint = ModelCheckpoint(filepath='outputFile/models/bestWeight\.hdf5', monitor="val_loss", verbose=1, save_best_only=True, mode='max')
+checkpoint = ModelCheckpoint(filepath='outputFile/models/bestWeight.hdf5', monitor='val_loss', verbose=1, save_best_only=True, mode='max')
 reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.3, patience=7, min_lr=1e-6, verbose=1)
 early_stop = EarlyStopping(monitor='val_loss', min_delta=0, patience=14, mode='auto', restore_best_weights=True)
 
@@ -178,10 +178,10 @@ if usingCheckPoint:
     # Create model
     model = create_model()
     # Load weights
-    model.load_weights('outputFile/models/bestWeight\.hdf5')
+    model.load_weights('outputFile/models/bestWeight.hdf5')
     # Compile model (required to make predictions)
     model.compile(optimizer=customAdam, loss='mse')
-    print("Created model and loaded weights from file")
+    print('Created model and loaded weights from file')
     if continueTraining:
         newEpochs = 10
         history = model.fit(train_X, train_y, epochs=newEpochs, batch_size=batch_size, validation_split=validation_split, verbose=2, shuffle=False, callbacks=[early_stop, checkpoint, reduce_lr])
@@ -193,16 +193,15 @@ else:
 model.model.save('outputFile/models/'+tTag+'EsModel')
 # https://stackoverflow.com/questions/42666046/loading-a-trained-keras-model-and-continue-training
 
-print(history.history.keys())
-
 # plot loss history
+print(history.history.keys())
 plt.ioff()
 fig = plt.figure(figsize=[12, 12])
 fig.suptitle('Loss Comparison', fontsize=16)
 plt.plot(history.history['loss'], label='train')
 plt.plot(history.history['val_loss'], label='validation')
 plt.legend(loc='upper right')
-plt.savefig('outputFile/models/'+tTag+'EsModel/'+'trainLossVsVal.png', format='png')
+plt.savefig('outputFile/models/'+tTag+'aRsModel/'+'trainLossVsValLoss.png', format='png')
 plt.close(fig)
 
 # make a prediction
@@ -223,15 +222,13 @@ print('Test RMSE: %.3f' % rmse)
 r2_score(yActual, yPredict)
 
 plt.ioff()
-fig = plt.figure(figsize=[24, 24])
-fig.suptitle('Actual vs Prediction', fontsize=16)
 pred_test_list = [i for i in yPredict]
 submission = pd.DataFrame({'Arousal': yActual, 'Prediction': pred_test_list})
-submission.loc[1:, ['Arousal', 'Prediction']].plot()
-plt.savefig('outputFile/models/'+tTag+'EsModel/'+'actualVsPrediction.png', format='png')
-plt.savefig('outputFile/models/'+tTag+'EsModel/'+'actualVsPrediction.svg', format='svg')
+submission.loc[1:, ['Arousal', 'Prediction']].plot(figsize=(36, 24), title='Actual VS Prediction', fontsize=16)
+plt.savefig('outputFile/models/'+tTag+'aRsModel/'+'actualVsPrediction.png', format='png')
+plt.savefig('outputFile/models/'+tTag+'aRsModel/'+'actualVsPrediction.svg', format='svg')
 plt.close(fig)
-submission.to_csv('outputFile/models/'+tTag+'EsModel/'+'es2jSubmission.csv', index=False)
+submission.to_csv('outputFile/models/'+tTag+'aRsModel/'+'aRsSubmission.csv', index=False)
 
 # print(pred_test_list[1000:1150])
 
@@ -242,7 +239,7 @@ d0 = submission[['Arousal', 'Prediction']]
 plt.ioff()
 fig = plt.figure(figsize=[24, 24])
 fig.suptitle('Actual Prediction Correlation', fontsize=16)
-sns.pairplot(d0, kind="scatter")
-plt.savefig('outputFile/models/'+tTag+'EsModel/'+'actualPredictionCorrelation.png', format='png')
-plt.savefig('outputFile/models/'+tTag+'EsModel/'+'actualPredictionCorrelation.svg', format='svg')
+sns.pairplot(d0, kind='scatter')
+plt.savefig('outputFile/models/'+tTag+'aRsModel/'+'actualPredictionCorrelation.png', format='png')
+plt.savefig('outputFile/models/'+tTag+'aRsModel/'+'actualPredictionCorrelation.svg', format='svg')
 plt.close(fig)
