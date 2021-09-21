@@ -5,6 +5,7 @@ from sklearn.model_selection import cross_val_score
 import numpy as np
 import pandas as pd
 import seaborn as sns
+import sys
 from tensorflow import keras
 from tensorflow.keras import layers
 import matplotlib.pyplot as plt
@@ -17,6 +18,20 @@ def timeTag():
     return datetime.now().strftime('[%Y%m%d%H%M]')
 
 tTag = timeTag()
+
+def ccc(x,y):
+    '''Concordance Correlation Coefficient'''
+    sxy = np.sum((x - x.mean())*(y - y.mean()))/x.shape[0]
+    rhoc = 2*sxy / (np.var(x) + np.var(y) + (x.mean() - y.mean())**2)
+    return rhoc
+
+def dispCCC(df):
+    # Get CCC
+    cccVal = ccc(df.loc[:,df.columns[0]], df.loc[:,df.columns[1]])
+    cccVal = np.array2string(cccVal, precision=4)
+    print('\t\t'+df.columns[0]+'\t\t'+df.columns[1])
+    print(df.columns[0]+'\t\t'+'1.0000'+'\t\t'+cccVal)
+    print(df.columns[1]+'\t'+cccVal+'\t\t'+'1.0000')
 
 # prepare data for lstms
 def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
@@ -50,6 +65,11 @@ n_features = 7
 
 usingJL = False
 transformTarget = True
+
+if usingJL:
+    jlTag = 'aRs2j'
+else:
+    jlTag = 'aRs'
 
 # read datasets, first n_steps data will be skipped
 # Possible columns: Time,Valence,Arousal,RMS,F0,MFCC1,MFCC2,MFCC3,MFCC4,MFCC5,FileName,voiceTag
@@ -190,8 +210,13 @@ else:
     history = model.fit(train_X, train_y, epochs=epochs, batch_size=batch_size, validation_split=validation_split, verbose=2, shuffle=False, callbacks=[early_stop, checkpoint, reduce_lr])
 
 # save the model
-model.model.save('outputFile/models/'+tTag+'EsModel')
+model.model.save('outputFile/models/'+tTag+jlTag+'Model')
 # https://stackoverflow.com/questions/42666046/loading-a-trained-keras-model-and-continue-training
+
+saveOutput = True
+# saving output
+if saveOutput:
+    sys.stdout = open('outputFile/models/'+tTag+jlTag+'Model/0utputLog.txt', "w")
 
 # plot loss history
 print(history.history.keys())
@@ -201,7 +226,7 @@ fig.suptitle('Loss Comparison', fontsize=16)
 plt.plot(history.history['loss'], label='train')
 plt.plot(history.history['val_loss'], label='validation')
 plt.legend(loc='upper right')
-plt.savefig('outputFile/models/'+tTag+'aRsModel/'+'trainLossVsValLoss.png', format='png')
+plt.savefig('outputFile/models/'+tTag+jlTag+'Model/'+'trainLossVsValLoss.png', format='png')
 plt.close(fig)
 
 # make a prediction
@@ -225,21 +250,28 @@ plt.ioff()
 pred_test_list = [i for i in yPredict]
 submission = pd.DataFrame({'Arousal': yActual, 'Prediction': pred_test_list})
 submission.loc[1:, ['Arousal', 'Prediction']].plot(figsize=(36, 24), title='Actual VS Prediction', fontsize=16)
-plt.savefig('outputFile/models/'+tTag+'aRsModel/'+'actualVsPrediction.png', format='png')
-plt.savefig('outputFile/models/'+tTag+'aRsModel/'+'actualVsPrediction.svg', format='svg')
+plt.savefig('outputFile/models/'+tTag+jlTag+'Model/'+'actualVsPrediction.png', format='png')
+plt.savefig('outputFile/models/'+tTag+jlTag+'Model/'+'actualVsPrediction.svg', format='svg')
 plt.close(fig)
-submission.to_csv('outputFile/models/'+tTag+'aRsModel/'+'aRsSubmission.csv', index=False)
+submission.to_csv('outputFile/models/'+tTag+jlTag+'Model/'+'submission.csv', index=False)
 
 # print(pred_test_list[1000:1150])
 
 correlation = submission.corr(method='pearson')
+print('Pearson Correlation')
 print(correlation)
+print()
+print('Concordance Correlation Coefficient')
+dispCCC(submission)
 
 d0 = submission[['Arousal', 'Prediction']]
 plt.ioff()
 fig = plt.figure(figsize=[24, 24])
 fig.suptitle('Actual Prediction Correlation', fontsize=16)
 sns.pairplot(d0, kind='scatter')
-plt.savefig('outputFile/models/'+tTag+'aRsModel/'+'actualPredictionCorrelation.png', format='png')
-plt.savefig('outputFile/models/'+tTag+'aRsModel/'+'actualPredictionCorrelation.svg', format='svg')
+plt.savefig('outputFile/models/'+tTag+jlTag+'Model/'+'actualPredictionCorrelation.png', format='png')
+plt.savefig('outputFile/models/'+tTag+jlTag+'Model/'+'actualPredictionCorrelation.svg', format='svg')
 plt.close(fig)
+
+if saveOutput:
+    sys.stdout.close()
