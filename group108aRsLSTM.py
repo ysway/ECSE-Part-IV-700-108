@@ -60,7 +60,7 @@ if usingJL:
     print(trainingDataset.head(5))
 
     testingDataset = pd.read_csv('inputFile/modelInput/jlco0000st.csv')
-    targetOfTestingDatasest = testingDataset['Arousal'][n_steps:]
+    targetOfTestingDataset = testingDataset['Arousal'][n_steps:]
     testingDataset = testingDataset[['RMS', 'F0', 'MFCC1', 'MFCC2', 'MFCC3', 'MFCC4', 'MFCC5']]
     print(trainingDataset.head(5))
 else:
@@ -107,7 +107,7 @@ if transformTarget:
     trainingyScaled = scaler.fit_transform(np.array(targetOfTrainingDataset).reshape(-1, 1))
 
     # seems no need to scale the test y, as it is only used for comparison
-    # testingyScaled = scaler.fit_transform(np.array(targetOfTestingDatasest).reshape(-1, 1))
+    # testingyScaled = scaler.fit_transform(np.array(targetOfTestingDataset).reshape(-1, 1))
 
 # split into input and outputs
 if usingJL:
@@ -117,7 +117,7 @@ if usingJL:
         train_X, train_y = train, targetOfTrainingDataset
 
     test_X = test
-    test_y = targetOfTestingDatasest
+    test_y = targetOfTestingDataset
 else:
     if transformTarget:
         train_X, train_y = train, trainingyScaled[:n_train_steps, 0]
