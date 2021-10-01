@@ -73,7 +73,7 @@ def main():
                     '''
                     dfT.join(dfR).join(dfF).join(dfM)
                     '''
-                    if rowF[0] >= startTimePrt:
+                    if rowF[0] >= startTimePtr:
                         vaDf = vaDf.append(nextVaDfValue, ignore_index=True)
                 # SAVE #
                 currentFeatureDf = currentFeatureDf.join(vaDf)
@@ -93,7 +93,7 @@ def main():
             currentVaDfValue = pd.DataFrame({'Valence': [0], 'Arousal': [0]})
             nextVaDfValue = pd.DataFrame({'Valence': [row[2]], 'Arousal': [row[3]]})
             # Start time covert to sec, move along when assign values
-            startTimePrt = 0
+            startTimePtr = 0
         else:
             pass
         
@@ -107,19 +107,19 @@ def main():
             '''
             dfT.join(dfR).join(dfF).join(dfM)
             '''
-            if rowF[0] >= startTimePrt and rowF[0] < endTimePtr:
+            if rowF[0] >= startTimePtr and rowF[0] < endTimePtr:
                 vaDf = vaDf.append(currentVaDfValue, ignore_index=True)
 
         # Update
         currentVaDfValue = nextVaDfValue
-        startTimePrt = endTimePtr
+        startTimePtr = endTimePtr
 
     # When finished csv file construct the last bit of currentFeatureDf
     for rowF in currentFeatureDf.itertuples(index=False):
         '''
         dfT.join(dfR).join(dfF).join(dfM)
         '''
-        if rowF[0] >= startTimePrt:
+        if rowF[0] >= startTimePtr:
             vaDf = vaDf.append(nextVaDfValue, ignore_index=True)
     
     currentFeatureDf = currentFeatureDf.join(vaDf)

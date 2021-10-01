@@ -42,8 +42,8 @@ def sessionProcess(dir, filenames, outputPath):
 
 # Main program entry
 def main():
-    inputPath = '../../outputFile/Semaine/TrainingInput/'
-    outputPath = '../../inputFile/modelInput/'
+    inputPath = '../../outputFile/Semaine/TrainingInput/oneSecond/'
+    outputPath = '../../inputFile/modelInput/oneSecond/'
 
     print("Start merging task")
     for dir, _, filenames in os.walk(inputPath):

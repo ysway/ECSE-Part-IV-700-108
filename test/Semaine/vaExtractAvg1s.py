@@ -1,6 +1,7 @@
 import os
 import sys
 import csv
+import pandas as pd
 
 def vaArrayExtractor(inputPathV, inputPathA):
     # arousal extraction
@@ -68,6 +69,25 @@ def sumSession(oldV, oldA, newV, newA, vaDataCountList):
             a = newA+oldA[len(newV):]
     return v, a, vaDataCountList
 
+def oneSecondVa(df):
+    vaDf = df[0:0]
+    rowCount = 0 # used for averaging, count the number of rows in a second
+    currentValence = 0
+    currentArousal = 0
+    for row in df.itertuples(index=False):
+        if (row.Time == int(row.Time) and rowCount != 0):
+            vaDf.loc[vaDf.shape[0]] = [int(row.Time) - 1, currentValence / rowCount, currentArousal / rowCount]
+            rowCount = 0
+            currentValence = 0
+            currentArousal = 0
+        currentArousal = currentArousal + row.Arousal
+        currentValence = currentValence + row.Valence
+        rowCount = rowCount + 1
+
+    vaDf.loc[vaDf.shape[0]] = [int(row.Time) - 1, currentValence / rowCount, currentArousal / rowCount]
+
+    return vaDf
+
 def saveAvgValues(inputPath, outputPath, talker, session, saveFormat, t, a, v, vaDataCountList):
     outputPath = outputPath+session+'/'
     print('\tMode: '+talker)
@@ -90,17 +110,21 @@ def saveAvgValues(inputPath, outputPath, talker, session, saveFormat, t, a, v, v
     if len(t) <= len(tmpList[0]):
         t = tmpList[0]
     del tmpList
-    # save to ouput path
-    file = open(outputPath+talker+'_VA'+saveFormat, 'w', newline='', encoding='utf-8')
-    writer = csv.writer(file)
-    writer.writerow(['Time', 'Valence', 'Arousal'])
+    
+    # save path
+    outputPath = outputPath+talker+'_VA'+saveFormat
+
+    # construct data frame
+    tvaDf = pd.DataFrame(columns=list(['Time', 'Valence', 'Arousal']))
     for index, timeStamp in enumerate(t):
         try:
-            writer.writerow([timeStamp, round(v[index]/vaDataCountList[index], 3), round(a[index]/vaDataCountList[index], 3)])
+            tvaDf.loc[tvaDf.shape[0]] = [timeStamp, round(v[index]/vaDataCountList[index], 3), round(a[index]/vaDataCountList[index], 3)]
         except:
             print('\t\tCSV writing index '+str(index)+' is out of bounds')
             break
-    file.close()
+
+    tvaDf1s = oneSecondVa(tvaDf)
+    tvaDf1s.to_csv(outputPath, index=False)
 
 def sessionIterator():
     validSessionsText = open('validSessions.txt', 'r').readlines()
@@ -109,7 +133,7 @@ def sessionIterator():
     del validSessionsText
 
     inputPath = '../../inputFile/Sessions/'
-    outputPath = '../../outputFile/Semaine/TrainingInput/'
+    outputPath = '../../outputFile/Semaine/TrainingInput/oneSecond/'
     saveFormat = '.csv'
 
     logging = False

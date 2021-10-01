@@ -9,13 +9,11 @@ def silenceStampExtract(audioPath, length):
     myaudio = AudioSegment.from_wav(audioPath)
     # by listening the audio and checking the db meter, the maximum volume of other talker is -50db
     slc = silence.detect_silence(
-        myaudio, min_silence_len=750, silence_thresh=-50)
+        myaudio, min_silence_len=1000, silence_thresh=-50)
     slc = [((start/1000), (stop/1000))
            for start, stop in slc]  # convert to sec
     slc = np.array([item for sublist in slc for item in sublist])  # flatten
-    slc = np.around(slc, 2)  # keep 2 dp
-    # evaluate points to nearest previous 20ms stamp
-    slc = (slc*100-slc*100 % 2)/100
+    slc = np.around(slc, 0) # whole number
     # Tag filling
     tagList = list()
     slc = np.append(slc, 9999)  # use length to determine the end
@@ -35,13 +33,13 @@ def silenceStampExtract(audioPath, length):
         else:
             pass
         tagList.append(tag)
-        time += 0.02
+        time += 1
     return np.array(tagList)
 
 def featureExtract(inputPath, outputPath):
-    # parameters of 20ms window under 48kHZ
+    # parameters of 1s window under 48kHZ
     samplingRate = 48000
-    frameLength = 960
+    frameLength = 48000
     mfccNum = 5
 
     x, sr = lbr.load(inputPath, sr=samplingRate, mono=True)
@@ -116,7 +114,7 @@ def sessionIterator():
     del validSessionsText
 
     inputPath = '../../inputFile/Sessions/'
-    outputPath = '../../outputFile/Semaine/TrainingInput/'
+    outputPath = '../../outputFile/Semaine/TrainingInput/oneSecond/'
     saveFormat = '.csv'
 
     logging = False
