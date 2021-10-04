@@ -5,7 +5,7 @@ import librosa as lbr
 def featureExtract(audioFile):
     # parameters of 20ms window under 44.1kHZ
     samplingRate = 44100
-    frameLength = 8820
+    frameLength = 882
     mfccNum = 5
 
     x, sr = lbr.load(audioFile, sr=samplingRate, mono=True)
